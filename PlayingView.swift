@@ -13,7 +13,9 @@ struct PlayingView: View {
     @EnvironmentObject var gameData: GameData
     
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        VStack {
+            Text("Players: \(gameData.numPlayers)")
+            Text("Mafia: \(gameData.numMafia)")        }
     }
 }
 
@@ -22,3 +24,4 @@ struct PlayingView_Previews: PreviewProvider {
         PlayingView()
     }
 }
+

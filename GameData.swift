@@ -7,8 +7,11 @@
 //
 
 import Foundation
+import SwiftUI
 
-class GameData: ObservableObject {
-    @Published var numPlayers: Int = 3
+final class GameData: ObservableObject {
+    @Published var numPlayers: Int = 4
+    @Published var numMafia: Int = 2
+    @Published var text: String = "Helloooo"
     
 }

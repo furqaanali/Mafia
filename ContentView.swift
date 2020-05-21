@@ -10,7 +10,7 @@ import SwiftUI
 
 struct ContentView: View {
     
-//    @EnvironmentObject var gameData: GameData
+    @EnvironmentObject var gameData: GameData
     
     var body: some View {
         NavigationView {

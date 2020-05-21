@@ -11,19 +11,15 @@ import SwiftUI
 struct GameSetupView: View {
     
     @EnvironmentObject var gameData: GameData
-    @State private var numPlayers = 5
-    @State private var numMafia = 2
+    @State var numPlayers = 5
+    @State var numMafia = 2
     
     var body: some View {
         VStack {
-            Stepper(value: $numPlayers, in: 3...20) {
-                Text("Players")
-                Text("\(numPlayers)")
-            }
-            Stepper(value: $numMafia, in: 1...5) {
-                Text("Mafia")
-                Text("\(numMafia)")
-            }
+            Stepper(value: self.$numPlayers, in: 4...25, step: 1, onEditingChanged: {_ in self.gameData.numPlayers = self.numPlayers}, label: {Text("Players \(self.numPlayers)")})
+            
+            Stepper(value: self.$numMafia, in: 4...25, step: 1, onEditingChanged: {_ in self.gameData.numMafia = self.numMafia}, label: {Text("Mafia \(self.numMafia)")})
+            
             NavigationLink(destination: PlayingView()) {
                 Text("Play")
             }
