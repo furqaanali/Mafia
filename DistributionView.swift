@@ -18,6 +18,13 @@ struct DistributionView: View {
     @State private var showingRole: Bool = false
     @State private var finishedDistribution: Bool = false
     
+    
+    //
+    // GenerateRoles:
+    //  populate the roles list in the environment object
+    //  with the appropriate number of roles
+    //  shuffle this list for random distribution
+    //
     func generateRoles() -> Void {
         for _ in 1...self.gameData.numPlayers {
             self.gameData.roles.append("Civilian")
@@ -28,11 +35,21 @@ struct DistributionView: View {
         self.gameData.roles.shuffle()
     }
     
+    //
+    // ClearRoles:
+    //  remove all elements from roles and playerNames
+    //  lists to allow a fresh start
+    //
     func clearRoles() -> Void {
         self.gameData.roles.removeAll()
         self.gameData.playerNames.removeAll()
     }
     
+    //
+    // DisplayRole:
+    //  pop up a new view where the current player
+    //  can view his/her role
+    //
     func displayRole() -> some View {
         return (
             VStack {
@@ -41,6 +58,11 @@ struct DistributionView: View {
         )
     }
     
+    //
+    // UpdateForNextPlayer:
+    //  update game values and prepare screen
+    //  for the next player
+    //
     func updateForNextPlayer() -> Void {
         if self.currentPlayer != "" {
             self.gameData.playerNames.append(self.currentPlayer)
@@ -50,10 +72,25 @@ struct DistributionView: View {
         }
     }
     
+    //
+    // CheckDistributionComplete
+    //  updates finishedDistribution value to true
+    //  if every player has recieved a role
+    //
+    func checkDistributionComplete() -> Void {
+        if self.currentIndex >= self.gameData.numPlayers - 1 {
+            self.finishedDistribution.toggle()
+        }
+    }
+    
+    //
+    // CreateDistributionView:
+    //  generate the view used to acquire each player's name
+    //  and provide them with a role
+    //
     func createDistributionView() -> some View {
         return (
             VStack {
-                        
                 Text("Distribution Screen")
                     .onAppear(perform: self.generateRoles)
                     .onDisappear(perform: self.clearRoles)
@@ -65,38 +102,32 @@ struct DistributionView: View {
                 Button(action: {self.updateForNextPlayer()}) {
                     Text("View Role")
                 }
-                    
                 // DESIGN OPTIONS: ACTION SHEET, SHEET, ALERT
-                    
-    //            .actionSheet(isPresented: $isDisabled) {
-    //                ActionSheet(title: Text("What do you want to do?"), message: Text("There's only one choice..."), buttons: [.default(Text("Dismiss Action Sheet"))])
-    //            }
                 .alert(isPresented: $showingRole) {
-                    Alert(title: Text("\(self.gameData.playerNames[currentIndex]), you are"), message: Text("\(self.gameData.roles[currentIndex])"), dismissButton: .default(Text("Close")) {
-                        if self.currentIndex >= self.gameData.numPlayers - 1 {
-                            self.finishedDistribution.toggle()
-                        }
-                        })
+                    Alert(title: Text("\(self.gameData.playerNames[currentIndex]), you are"), message: Text("\(self.gameData.roles[currentIndex])"), dismissButton: .default(Text("Close")) {self.checkDistributionComplete()})
                 }
-    //            .sheet(isPresented: $isDisabled) {
-    //                Text("Return to Director")
-    //            }
-    //            .sheet(isPresented: $isDisabled) {
-    //                self.displayRole()
-    //            }
                 
-                List(self.gameData.roles, id: \.self) { role in
+                List(gameData.roles, id: \.self) { role in
                     Text(role)
                 }
                 
-                List(self.gameData.playerNames, id: \.self) { name in
+                List(gameData.playerNames, id: \.self) { name in
                     Text(name)
                 }
             }
         )
     }
     
-    func createReturnView() -> some View {
+    //
+    // CreateReturnView:
+    //  generate the transition view that will prevent
+    //  players from accessing the next view
+    //
+    //  prevents roles from being compromised
+    //
+    // TODO: password protect
+    //
+    func createTransitionView() -> some View {
         return (
             VStack {
                 Text("Return to Director")
@@ -107,17 +138,22 @@ struct DistributionView: View {
             }
         )
     }
-    
+
+    //
+    // Body:
+    //  content and behavior of DistributionView
+    //
     var body: some View {
         Group {
             if !finishedDistribution {
                 createDistributionView()
             }
             else {
-                createReturnView()
+                createTransitionView()
             }
         }
     }
+    
 }
 
 struct DistributionView_Previews: PreviewProvider {
