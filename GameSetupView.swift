@@ -18,9 +18,9 @@ struct GameSetupView: View {
         VStack {
             Stepper(value: self.$numPlayers, in: 4...25, step: 1, onEditingChanged: {_ in self.gameData.numPlayers = self.numPlayers}, label: {Text("Players \(self.numPlayers)")})
             
-            Stepper(value: self.$numMafia, in: 4...25, step: 1, onEditingChanged: {_ in self.gameData.numMafia = self.numMafia}, label: {Text("Mafia \(self.numMafia)")})
+            Stepper(value: self.$numMafia, in: 1...5, step: 1, onEditingChanged: {_ in self.gameData.numMafia = self.numMafia}, label: {Text("Mafia \(self.numMafia)")})
             
-            NavigationLink(destination: PlayingView()) {
+            NavigationLink(destination: DistributionView()) {
                 Text("Play")
             }
         }

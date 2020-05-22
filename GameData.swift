@@ -10,8 +10,10 @@ import Foundation
 import SwiftUI
 
 final class GameData: ObservableObject {
-    @Published var numPlayers: Int = 4
+    @Published var numPlayers: Int = 5
     @Published var numMafia: Int = 2
-    @Published var text: String = "Helloooo"
+    
+    @Published var playerNames: [String] = []
+    @Published var roles: [String] = []
     
 }
