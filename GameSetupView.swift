@@ -14,6 +14,11 @@ struct GameSetupView: View {
     @State var numPlayers = 5
     @State var numMafia = 2
     
+    
+    //
+    // Body:
+    //  content and behavior of GameSetupView
+    //
     var body: some View {
         VStack {
             Stepper(value: self.$numPlayers, in: 4...25, step: 1, onEditingChanged: {_ in self.gameData.numPlayers = self.numPlayers}, label: {Text("Players \(self.numPlayers)")})

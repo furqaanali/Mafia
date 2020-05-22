@@ -12,6 +12,11 @@ struct ContentView: View {
     
     @EnvironmentObject var gameData: GameData
     
+  
+    //
+    // Body:
+    //  content and behavior of ContentView
+    //
     var body: some View {
         NavigationView {
             NavigationLink(destination: GameSetupView()) {

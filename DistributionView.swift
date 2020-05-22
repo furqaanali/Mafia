@@ -93,7 +93,7 @@ struct DistributionView: View {
             VStack {
                 Text("Distribution Screen")
                     .onAppear(perform: self.generateRoles)
-                    .onDisappear(perform: self.clearRoles)
+//                    .onDisappear(perform: self.clearRoles)
                 
                 Text("Player #\(self.currentIndex + 2)")
                 
@@ -105,14 +105,6 @@ struct DistributionView: View {
                 // DESIGN OPTIONS: ACTION SHEET, SHEET, ALERT
                 .alert(isPresented: $showingRole) {
                     Alert(title: Text("\(self.gameData.playerNames[currentIndex]), you are"), message: Text("\(self.gameData.roles[currentIndex])"), dismissButton: .default(Text("Close")) {self.checkDistributionComplete()})
-                }
-                
-                List(gameData.roles, id: \.self) { role in
-                    Text(role)
-                }
-                
-                List(gameData.playerNames, id: \.self) { name in
-                    Text(name)
                 }
             }
         )
@@ -132,7 +124,7 @@ struct DistributionView: View {
             VStack {
                 Text("Return to Director")
                 
-                NavigationLink(destination: PlayingView()) {
+                NavigationLink(destination: DirectorsView()) {
                     Text("Continue to Directors Screen")
                 }
             }
