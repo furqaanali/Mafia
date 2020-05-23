@@ -106,3 +106,28 @@ struct PlayerRow_Previews: PreviewProvider {
     }
 }
 */
+
+import SwiftUI
+
+struct Testing: View {
+
+    var body: some View {
+        VStack {
+            HStack {
+                Text("Hello")
+                Text("Civilian")
+                    .font(.caption)
+                    .fontWeight(.light)
+                    .foregroundColor(Color.pink)
+                    
+                Spacer()
+            }
+        }
+    }
+}
+
+struct Testing_Previews: PreviewProvider {
+    static var previews: some View {
+        Testing()
+    }
+}

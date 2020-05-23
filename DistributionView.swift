@@ -26,11 +26,19 @@ struct DistributionView: View {
     //  shuffle this list for random distribution
     //
     func generateRoles() -> Void {
-        for _ in 1...self.gameData.numPlayers {
-            self.gameData.roles.append("Civilian")
+        for (key,value) in gameData.additionalRoles {
+            print("\(key) : \(value)")
         }
-        for index in 0...self.gameData.numMafia - 1 {
-            self.gameData.roles[index] = "Mafia"
+        for _ in 1...self.gameData.numMafia {
+            gameData.roles.append("Mafia")
+        }
+        for (roleName, isPresent) in gameData.additionalRoles {
+            if isPresent {
+                gameData.roles.append(roleName)
+            }
+        }
+        for _ in gameData.roles.count...gameData.numPlayers {
+            self.gameData.roles.append("Civilian")
         }
         for _ in 1...self.gameData.numPlayers {
             self.gameData.isActive.append(true)
@@ -98,6 +106,7 @@ struct DistributionView: View {
                 Text("Distribution Screen")
                     .onAppear(perform: self.generateRoles)
 //                    .onDisappear(perform: self.clearRoles)
+                
                 
                 Text("Player #\(self.currentIndex + 2)")
                 

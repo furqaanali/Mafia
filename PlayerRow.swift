@@ -29,6 +29,7 @@ struct PlayerRow: View {
 //                Circle().stroke(Color.white, lineWidth: 4))
 //            .shadow(radius: 10)
             Text(gameData.playerNames[index])
+//            Text(gameData.roles[index])
             
             Spacer()
             
