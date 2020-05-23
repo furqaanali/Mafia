@@ -32,6 +32,9 @@ struct DistributionView: View {
         for index in 0...self.gameData.numMafia - 1 {
             self.gameData.roles[index] = "Mafia"
         }
+        for _ in 1...self.gameData.numPlayers {
+            self.gameData.isActive.append(true)
+        }
         self.gameData.roles.shuffle()
     }
     
@@ -66,6 +69,7 @@ struct DistributionView: View {
     func updateForNextPlayer() -> Void {
         if self.currentPlayer != "" {
             self.gameData.playerNames.append(self.currentPlayer)
+            self.gameData.activePlayers.append(self.currentPlayer)
             self.currentPlayer.removeAll()
             self.showingRole.toggle()
             self.currentIndex += 1
@@ -111,7 +115,7 @@ struct DistributionView: View {
     }
     
     //
-    // CreateReturnView:
+    // CreateTransitionView:
     //  generate the transition view that will prevent
     //  players from accessing the next view
     //

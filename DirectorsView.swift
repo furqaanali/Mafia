@@ -16,44 +16,79 @@ struct DirectorsView: View {
     
     @State private var attacked: Int = -1
     @State private var rescued: Int = -1
+    @State private var lynched: Int = -1
     
     @State private var isNight: Bool = false
     @State private var showingResults: Bool = false
+    @State private var isLynching: Bool = false
     
     @State var attackedPlayerName: String = ""
     @State var rescuedPlayerName: String = ""
     
+    @State var lynchAvailable: Bool = false
+    
     
     //
     // PrepareForNewRound
-    //  reset all roundly game values and update round number
+    //  reset all roundly game values,
+    //  update round number,
+    //  and trigger NightView()
     //
     func prepareForNewRound() -> Void {
         self.attackedPlayerName = ""
         self.rescuedPlayerName = ""
-        self.currentRound += 1
         self.attacked = -1
         self.rescued = -1
+        self.lynched = -1
+        self.currentRound += 1
+        self.lynchAvailable = false
+        self.isNight.toggle()
     }
     
+    
     //
-    // EvaluateLastRound
+    // EvaluateEvents
     //  evaluate which players were eliminated
     //  and store attacked/rescued players
     //
-    func evaluateLastRound() -> Void {
-        if attacked >= 0 {
-            attackedPlayerName = gameData.playerNames[attacked]
+    func evaluateEvents() -> Void {
+        if !lynchAvailable {
+            if attacked >= 0 {
+                attackedPlayerName = gameData.activePlayers[attacked]
+            }
+            if rescued >= 0 {
+                rescuedPlayerName = gameData.activePlayers[rescued]
+            }
+            
+            if attacked != rescued {    // player was killed
+                if attacked != -1 {
+                    eliminatePlayer(playerName: attackedPlayerName)
+                }
+            }
+            lynchAvailable.toggle()
         }
-        if rescued >= 0 {
-            rescuedPlayerName = gameData.playerNames[rescued]
+        else {  // performing lynch
+            if lynched != -1 {
+                eliminatePlayer(playerName: gameData.activePlayers[lynched])
+                lynchAvailable.toggle()
+            }
         }
-        
-        if attacked != rescued {
-            self.gameData.playerNames[attacked].append(contentsOf: " (Dead)")
-        }
-        
     }
+    
+    
+    //
+    // EliminatePlayer
+    //  remove player from activePlayers list
+    //  and update the isActive list to display
+    //  an elimination symbol beside the player name
+    //
+    func eliminatePlayer(playerName: String) -> Void {
+        var index = gameData.activePlayers.firstIndex(of: playerName)
+        gameData.activePlayers.remove(at: index!)
+        index = gameData.playerNames.firstIndex(of: playerName)
+        gameData.isActive[index!] = false
+    }
+    
     
     //
     // PresentResults
@@ -68,6 +103,24 @@ struct DirectorsView: View {
         )
     }
     
+    
+    //
+    // UpdateView
+    //  after returning to Day View, call functions to:
+    //  process the previous Night's events,
+    //  update the current game info and view,
+    //  and trigger the presentResults() sheet
+    //
+    func updateView() -> Void {
+        if self.currentRound > 1 {
+            self.evaluateEvents()
+            if self.lynchAvailable {
+                self.showingResults.toggle()
+            }
+        }
+    }
+    
+    
     //
     // CreateDayView
     //  generate view where director can
@@ -76,33 +129,30 @@ struct DirectorsView: View {
     func createDayView() -> some View {
         return (
             VStack {
-                Text("Players: \(gameData.numPlayers)")
-                Text("Mafia: \(gameData.numMafia)")
+                Text("Directors View")
+                    .font(.title)
 
-                List(gameData.roles.indices, id: \.self) { index in
-                    HStack{
-                        Text(self.gameData.playerNames[index])
-                        Text(self.gameData.roles[index])
+                List(gameData.playerNames.indices, id: \.self) { index in
+                    PlayerRow(index: index, isActive: self.gameData.isActive[index])
+                }
+                
+                HStack {
+                    Button(action: {self.prepareForNewRound()}) {
+                        Text("Begin Night")
+                    }
+                    
+                    if lynchAvailable {
                         Spacer()
+                        Button(action: {self.isLynching.toggle()}) {
+                            Text("Lynch")
+                        }
                     }
                 }
-                
-                Button(action: {
-                    self.prepareForNewRound()
-                    self.isNight.toggle()
-                    
-                }) {
-                    Text("Begin Night")
-                }
+                .padding()
+                .padding()
                 
                 Text("Round: \(currentRound)")
-                    .onAppear(perform: {
-                        if self.currentRound > 1 {
-                            self.evaluateLastRound()
-                            self.showingResults.toggle()
-                        }
-                        
-                    })
+                    .onAppear(perform: {self.updateView()})
                     .sheet(isPresented: self.$showingResults) {
                         self.presentResults()
                 }
@@ -123,8 +173,8 @@ struct DirectorsView: View {
                     Form {
                         Text("Who does the Mafia attack?")
                         Picker(selection: self.$attacked, label: Text("")) {
-                            ForEach(0 ..< self.gameData.playerNames.count) {
-                                Text(self.gameData.playerNames[$0])
+                            ForEach(0 ..< self.gameData.activePlayers.count) {
+                                Text(self.gameData.activePlayers[$0])
                            }
                         }
                     }
@@ -134,8 +184,8 @@ struct DirectorsView: View {
                     Form {
                         Text("Who does the Doctor Rescue?")
                         Picker(selection: self.$rescued, label: Text("")) {
-                            ForEach(0 ..< self.gameData.playerNames.count) {
-                                Text(self.gameData.playerNames[$0])
+                            ForEach(0 ..< self.gameData.activePlayers.count) {
+                                Text(self.gameData.activePlayers[$0])
                            }
                         }
                     }
@@ -143,17 +193,50 @@ struct DirectorsView: View {
                 
                 Form {
                     if attacked >= 0 {
-                        Text("Attacked: \(self.gameData.playerNames[attacked])")
+                        Text("Attacked: \(self.gameData.activePlayers[attacked])")
                     }
                     if rescued >= 0 {
-                        Text("Rescued: \(self.gameData.playerNames[rescued])")
+                        Text("Rescued: \(self.gameData.activePlayers[rescued])")
                     }
                 }
                 
                 Button(action: {self.isNight.toggle()}) {
                     Text("Confirm")
                 }
+            }
+        )
+    }
+    
+    
+    //
+    // CreateLynchView
+    //  generate view where director can
+    //  select which player the community
+    //  decided to lynch
+    //
+    func createLynchView() -> some View {
+        return (
+            VStack {
+                NavigationView {
+                    Form {
+                        Text("Who does the Community lynch?")
+                        Picker(selection: self.$lynched, label: Text("")) {
+                            ForEach(0 ..< self.gameData.activePlayers.count) {
+                                Text(self.gameData.activePlayers[$0])
+                           }
+                        }
+                    }
+                }
                 
+                Form {
+                    if lynched >= 0 {
+                        Text("Lynched: \(self.gameData.activePlayers[lynched])")
+                    }
+                }
+                
+                Button(action: {self.isLynching.toggle()}) {
+                    Text("Confirm")
+                }
             }
         )
     }
@@ -165,11 +248,14 @@ struct DirectorsView: View {
     //
     var body: some View {
         Group {
-            if !isNight {
+            if !isNight && !isLynching {
                 createDayView()
             }
-            else {
+            else if isNight {
                 createNightView()
+            }
+            else {
+                createLynchView()
             }
         }
     }

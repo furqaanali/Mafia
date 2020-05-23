@@ -1,3 +1,4 @@
+/*
 //
 //  Testing.swift
 //  Mafia3
@@ -62,3 +63,46 @@ struct Testing_Previews: PreviewProvider {
         Testing()
     }
 }
+*/
+
+
+//
+//  PlayerRow.swift
+//  Mafia3
+//
+//  Created by Furqaan Ali on 5/22/20.
+//  Copyright © 2020 Furqaan Ali. All rights reserved.
+//
+
+/*
+import SwiftUI
+
+struct PlayerRow: View {
+    
+    var playerNames = ["Ayesha", "Farhan", "Furqaan", "Aamina"]
+    var roles = ["Civilian", "Mafia", "Civilian", "Doctor"]
+    
+    var index: Int
+    
+    var body: some View {
+        HStack {
+            Image(roles[index])
+            .resizable()
+            .frame(width: 50, height: 50)
+//            .clipShape(Circle())
+//            .overlay(
+//                Circle().stroke(Color.white, lineWidth: 4))
+//            .shadow(radius: 10)
+            Text(playerNames[index])
+            Text(roles[index])
+            Spacer()
+        }
+    }
+}
+
+struct PlayerRow_Previews: PreviewProvider {
+    static var previews: some View {
+        PlayerRow(index: 0)
+    }
+}
+*/
