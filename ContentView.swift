@@ -12,7 +12,6 @@ struct ContentView: View {
     
     @EnvironmentObject var gameData: GameData
     
-  
     //
     // Body:
     //  content and behavior of ContentView

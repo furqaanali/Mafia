@@ -18,6 +18,10 @@ struct DistributionView: View {
     @State private var showingRole: Bool = false
     @State private var finishedDistribution: Bool = false
     
+    @State private var password: String = ""
+    @State private var isPasswordValid: Bool = false
+    @State private var showingPasswordRejected: Bool = false
+    
     
     //
     // GenerateRoles:
@@ -26,9 +30,6 @@ struct DistributionView: View {
     //  shuffle this list for random distribution
     //
     func generateRoles() -> Void {
-        for (key,value) in gameData.additionalRoles {
-            print("\(key) : \(value)")
-        }
         for _ in 1...self.gameData.numMafia {
             gameData.roles.append("Mafia")
         }
@@ -37,8 +38,10 @@ struct DistributionView: View {
                 gameData.roles.append(roleName)
             }
         }
-        for _ in gameData.roles.count...gameData.numPlayers {
-            self.gameData.roles.append("Civilian")
+        for index in gameData.roles.count...gameData.numPlayers {
+            if index != gameData.numPlayers {
+                self.gameData.roles.append("Civilian")
+            }
         }
         for _ in 1...self.gameData.numPlayers {
             self.gameData.isActive.append(true)
@@ -135,13 +138,38 @@ struct DistributionView: View {
     func createTransitionView() -> some View {
         return (
             VStack {
-                Text("Return to Director")
+                if !isPasswordValid {
+                    Text("Return to Director")
                 
-                NavigationLink(destination: DirectorsView()) {
-                    Text("Continue to Directors Screen")
+                    TextField("Enter Game Password", text: $password)
+                    
+                    Button(action: {self.validatePassword()}) {
+                        Text("Submit Password")
+                    }
+                    .alert(isPresented: $showingPasswordRejected) {
+                    Alert(title: Text("Incorrect Password"), message: Text("Please enter the password that was created earlier in the game"), dismissButton: .default(Text("Close")))
+                    }
+                }
+                
+                else {
+                    NavigationLink(destination: DirectorsView()) {
+                        Text("Continue to Directors Screen")
+                    }
                 }
             }
         )
+    }
+    
+    //
+    // ValidatePassword
+    //
+    func validatePassword() {
+        if password == gameData.password {
+            isPasswordValid = true
+        }
+        else {
+            showingPasswordRejected.toggle()
+        }
     }
 
     //

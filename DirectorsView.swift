@@ -21,11 +21,10 @@ struct DirectorsView: View {
     @State private var isNight: Bool = false
     @State private var showingResults: Bool = false
     @State private var isLynching: Bool = false
+    @State private var lynchAvailable: Bool = false
     
-    @State var attackedPlayerName: String = ""
-    @State var rescuedPlayerName: String = ""
-    
-    @State var lynchAvailable: Bool = false
+    @State private var attackedPlayerName: String = ""
+    @State private var rescuedPlayerName: String = ""
     
     
     //

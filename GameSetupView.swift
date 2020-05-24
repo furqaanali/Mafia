@@ -11,21 +11,23 @@ import SwiftUI
 struct GameSetupView: View {
     
     @EnvironmentObject var gameData: GameData
-    @State var numPlayers = 5
-    @State var numMafia = 2
     
-    @State var includeBarman: Bool = false
-    @State var includeCupid: Bool = false
-    @State var includeDetective: Bool = false
-    @State var includeDoctor: Bool = false
-    @State var includeGrandma: Bool = false
-    @State var includeKiller: Bool = false
-    @State var includeLawyer: Bool = false
+    @State private var numPlayers = 5
+    @State private var numMafia = 2
     
-    @State var dataCollected: Bool = false
+    @State private var includeBarman: Bool = false
+    @State private var includeCupid: Bool = false
+    @State private var includeDetective: Bool = false
+    @State private var includeDoctor: Bool = false
+    @State private var includeGrandma: Bool = false
+    @State private var includeKiller: Bool = false
+    @State private var includeLawyer: Bool = false
     
-    @State var password: String = ""
-    @State var passwordAccepted: Bool = false
+    @State private var dataCollected: Bool = false
+    @State private var showInvalidAlert: Bool = false
+    
+    @State private var password: String = ""
+    @State private var passwordAccepted: Bool = false
     
     
     //
@@ -33,6 +35,9 @@ struct GameSetupView: View {
     //  copy all of the acquired information into
     //  the @EnvironmentObject so this data can
     //  be accessed later in the game
+    //
+    //  display an error message if settings are invalid
+    //  else, continue to next screen
     //
     func saveGameData() -> Void {
         gameData.numPlayers = self.numPlayers
@@ -44,7 +49,34 @@ struct GameSetupView: View {
         gameData.additionalRoles["Grandma with a Shotgun"] = self.includeGrandma
         gameData.additionalRoles["Serial Killer"] = self.includeKiller
         gameData.additionalRoles["Lawyer"] = self.includeLawyer
-        dataCollected.toggle()
+        
+        if isGameDataValid() {
+            dataCollected.toggle()
+        }
+        else {
+            showInvalidAlert.toggle()
+        }
+    }
+    
+    
+    //
+    // IsGameDataValid
+    //  check if the game settings are valid
+    //  numPlayers must be >= numMafia + otherRoles
+    //
+    func isGameDataValid() -> Bool {
+        var numAdvancedRoles = 0
+        for (_,value) in gameData.additionalRoles {
+            if value == true {
+                numAdvancedRoles += 1
+            }
+        }
+        if gameData.numPlayers >= gameData.numMafia + numAdvancedRoles {
+            return true
+        }
+        else {
+            return false
+        }
     }
     
     //
@@ -100,6 +132,9 @@ struct GameSetupView: View {
                 }) {
                     Text("Continue")
                 }
+                .alert(isPresented: $showInvalidAlert) {
+                Alert(title: Text("Invalid Settings"), message: Text("There are more roles than the given player count"), dismissButton: .default(Text("Close")))
+                }
             }
             .padding()
             .padding()
@@ -115,9 +150,9 @@ struct GameSetupView: View {
     func createPasswordCreationView() -> some View {
         return (
             VStack {
-                TextField("Create A Password", text: $password)
-                
                 if !passwordAccepted {
+                    TextField("Create A Password", text: $password)
+                    
                     Button(action: {self.savePassword()}) {
                         Text("Save Password")
                     }
