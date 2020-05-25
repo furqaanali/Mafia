@@ -115,32 +115,47 @@ struct Testing: View {
     @State private var myDictVals = [-1, -1, -1, -1]
     @State var mylist = [ "jack", "joe" , "ben"]
     @State var temp = [-1]
+    
+    @State var playerNames = ["Ayesha", "Farhan", "Furqaan", "Aamina"]
+    @State var lover = ""
 
     var body: some View {
         VStack {
-            
-            ForEach(myDictKeys.indices, id: \.self) { index in
-                NavigationView {
-                    Form {
-                        Text("Who does \(self.myDictKeys[index]) choose?")
-                        Picker(selection: self.$myDictVals[index], label: Text("hi")) {
-                            ForEach(0 ..< self.mylist.count) {
-                                Text(self.mylist[$0])
-                           }
+            List {
+                ForEach(self.playerNames, id: \.self) { player in
+                    MultipleSelectionRow(title: player, isSelected: self.playerNames[0] == player) {
+                        if self.lover.contains(player) {
+                            self.lover.removeAll()
                         }
-                    }
-//                    .frame(height: 200.0)
-                }
-            }
-            Form {
-                ForEach(myDictKeys.indices, id: \.self) {index in
-                    Group {
-                        if self.myDictVals[index] >= 0 {
-                            Text(self.mylist[self.myDictVals[index]])
+                        else {
+                            self.lover.removeAll()
+                            self.lover.append(player)
                         }
                     }
                 }
             }
+//            ForEach(myDictKeys.indices, id: \.self) { index in
+//                NavigationView {
+//                    Form {
+//                        Text("Who does \(self.myDictKeys[index]) choose?")
+//                        Picker(selection: self.$myDictVals[index], label: Text("hi")) {
+//                            ForEach(0 ..< self.mylist.count) {
+//                                Text(self.mylist[$0])
+//                           }
+//                        }
+//                    }
+////                    .frame(height: 200.0)
+//                }
+//            }
+//            Form {
+//                ForEach(myDictKeys.indices, id: \.self) {index in
+//                    Group {
+//                        if self.myDictVals[index] >= 0 {
+//                            Text(self.mylist[self.myDictVals[index]])
+//                        }
+//                    }
+//                }
+//            }
 //            HStack {
 //                Text("Hello")
 //                Text("Civilian")

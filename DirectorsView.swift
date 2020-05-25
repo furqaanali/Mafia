@@ -52,6 +52,7 @@ struct DirectorsView: View {
     
 //    @State var lovers: [String] = []
     
+    @State var index = 0
     
     //
     // PrepareForNewRound
@@ -68,6 +69,7 @@ struct DirectorsView: View {
         self.protectedFromLynch = ""
         self.currentRound += 1
         self.lynchAvailable = false
+        self.index = 0
         self.isNight.toggle()
     }
     
@@ -265,40 +267,40 @@ struct DirectorsView: View {
     func createNightView() -> some View {
         return (
             VStack {
-                
-                ForEach(nightlyRoles.indices, id: \.self) { index in
-                    Group {
-                        if self.gameData.roles.contains(self.nightlyRoles[index]) && self.gameData.isActive[self.gameData.roles.firstIndex(of: self.nightlyRoles[index])!] || self.nightlyRoles[index] == "Mafia" {
-                            NavigationView {
-                                Form {
-                                    Picker(selection: self.$nightlyChoices[index], label: Text("Who does \(self.nightlyRoles[index]) choose?")) {
-                                        ForEach(0 ..< self.gameData.activePlayers.count) {
-                                            Text(self.gameData.activePlayers[$0])
-                                       }
-                                    }
-                                }
-//                                .frame(height: 200.0)
-                            }
-                        }
-                    }
-                }
-                
+
                 Group {
-                    if self.currentRound == 2 {
-                        List {
-                            ForEach(self.gameData.playerNames, id: \.self) { player in
-                                MultipleSelectionRow(title: player, isSelected: self.gameData.lovers.contains(player)) {
-                                    if self.gameData.lovers.contains(player) {
-                                        self.gameData.lovers.removeAll(where: { $0 == player })
-                                    }
-                                    else {
-                                        self.gameData.lovers.append(player)
-                                    }
+                    List {
+                        Text("Who does \(self.nightlyRoles[index])")
+                        ForEach(self.gameData.activePlayers, id: \.self) { player in
+                            MultipleSelectionRow(title: player, isSelected: self.nightlyChoices[self.index] != -1 && self.gameData.activePlayers[self.nightlyChoices[self.index]]==player) {
+                                if self.nightlyChoices[self.index] != -1 && self.gameData.activePlayers[self.nightlyChoices[self.index]] == player {
+                                    self.nightlyChoices[self.index] = -1
+                                }
+                                else {
+                                    self.nightlyChoices[self.index] = self.gameData.activePlayers.firstIndex(of: player)!
                                 }
                             }
                         }
                     }
                 }
+                
+                
+//                Group {
+//                    if self.currentRound == 2 {
+//                        List {
+//                            ForEach(self.gameData.playerNames, id: \.self) { player in
+//                                MultipleSelectionRow(title: player, isSelected: self.gameData.lovers.contains(player)) {
+//                                    if self.gameData.lovers.contains(player) {
+//                                        self.gameData.lovers.removeAll(where: { $0 == player })
+//                                    }
+//                                    else {
+//                                        self.gameData.lovers.append(player)
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
                 
 
                 Form {
@@ -311,7 +313,16 @@ struct DirectorsView: View {
                     }
                 }
 
-                Button(action: {self.isNight.toggle()}) {
+                Button(action: {
+                    repeat {
+                        self.index += 1
+                        if self.index >= 5 {
+                            self.isNight.toggle()
+                            break
+                        }
+                    }
+                    while ( !(self.gameData.roles.contains(self.nightlyRoles[self.index]) && self.gameData.isActive[self.gameData.roles.firstIndex(of: self.nightlyRoles[self.index])!]))
+                }) {
                     Text("Confirm")
                 }
             }
