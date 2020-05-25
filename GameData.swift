@@ -22,4 +22,6 @@ final class GameData: ObservableObject {
     @Published var isActive: [Bool] = []
     @Published var activePlayers: [String] = []
     
+    @Published var lovers: [String] = []
+    
 }

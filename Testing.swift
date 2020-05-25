@@ -110,18 +110,74 @@ struct PlayerRow_Previews: PreviewProvider {
 import SwiftUI
 
 struct Testing: View {
+    
+    @State private var myDictKeys = ["Mafia", "Doctor", "Killer", "Joker"]
+    @State private var myDictVals = [-1, -1, -1, -1]
+    @State var mylist = [ "jack", "joe" , "ben"]
+    @State var temp = [-1]
 
     var body: some View {
         VStack {
-            HStack {
-                Text("Hello")
-                Text("Civilian")
-                    .font(.caption)
-                    .fontWeight(.light)
-                    .foregroundColor(Color.pink)
-                    
-                Spacer()
+            
+            ForEach(myDictKeys.indices, id: \.self) { index in
+                NavigationView {
+                    Form {
+                        Text("Who does \(self.myDictKeys[index]) choose?")
+                        Picker(selection: self.$myDictVals[index], label: Text("hi")) {
+                            ForEach(0 ..< self.mylist.count) {
+                                Text(self.mylist[$0])
+                           }
+                        }
+                    }
+//                    .frame(height: 200.0)
+                }
             }
+            Form {
+                ForEach(myDictKeys.indices, id: \.self) {index in
+                    Group {
+                        if self.myDictVals[index] >= 0 {
+                            Text(self.mylist[self.myDictVals[index]])
+                        }
+                    }
+                }
+            }
+//            HStack {
+//                Text("Hello")
+//                Text("Civilian")
+//                    .font(.caption)
+//                    .fontWeight(.light)
+//                    .foregroundColor(Color.pink)
+//
+//                Spacer()
+//            }
+//            List {
+//            Group {
+//                ForEach(myDict.sorted(by: >), id: \.key) { key, value in
+//                    NavigationView {
+//                        Form {
+//                            Text("Who does \(key) choose?")
+//                            Picker(selection: self.$myDict["Mafia"], label: Text("hi")) {
+//                                ForEach(0 ..< self.mylist.count) {
+//                                    Text(self.mylist[$0])
+//                               }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//            Group {
+//            ForEach(myDict.sorted(by: >), id: \.key) { key, value in
+//                Group {
+//                    if value >= 0 {
+//                        Text("Attacked: \(value)")
+//                    }
+//                }
+////            }
+//            }
+//            Text(String(myDict.))
+//            Text(String(self.myDict["Doctor"]!))
+//            Text(String(self.myDict["Killer"]!))
+//            }
         }
     }
 }

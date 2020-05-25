@@ -33,6 +33,12 @@ struct PlayerRow: View {
             
             Spacer()
             
+            if gameData.lovers.contains(gameData.playerNames[index]) {
+                Image("Lover")
+                .resizable()
+                .frame(width: 50, height: 50)
+            }
+            
             if !isActive {
                 Image("Dead")
                 .resizable()
