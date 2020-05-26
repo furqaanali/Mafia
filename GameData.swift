@@ -21,7 +21,6 @@ final class GameData: ObservableObject {
     @Published var roles: [String] = []
     @Published var isActive: [Bool] = []
     @Published var activePlayers: [String] = []
-    
     @Published var lovers: [String] = []
     
 }

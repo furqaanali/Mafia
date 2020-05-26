@@ -123,7 +123,7 @@ struct Testing: View {
         VStack {
             List {
                 ForEach(self.playerNames, id: \.self) { player in
-                    MultipleSelectionRow(title: player, isSelected: self.playerNames[0] == player) {
+                    SelectionRow(title: player, isSelected: self.playerNames[0] == player) {
                         if self.lover.contains(player) {
                             self.lover.removeAll()
                         }

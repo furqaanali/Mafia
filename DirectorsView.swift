@@ -8,51 +8,26 @@
 
 import SwiftUI
 
-struct MultipleSelectionRow: View {
-    var title: String
-    var isSelected: Bool
-    var action: () -> Void
-
-    var body: some View {
-        Button(action: self.action) {
-            HStack {
-                Text(self.title)
-                if self.isSelected {
-                    Spacer()
-                    Image(systemName: "checkmark")
-                }
-            }
-        }
-    }
-}
-
 struct DirectorsView: View {
     
     @EnvironmentObject var gameData: GameData
     
     @State private var currentRound: Int = 1
     
-//    @State private var attacked: Int = -1
-//    @State private var rescued: Int = -1
-    @State private var lynched: Int = -1
-    @State private var protectedFromLynch: String = ""
+    @State private var playerBeingLynched: String = ""
+    @State private var playerProtectedFromLynch: String = ""
     
     @State private var isNight: Bool = false
-    @State private var showingResults: Bool = false
-    @State private var isLynching: Bool = false
+    @State private var showingResultsSheet: Bool = false
+    @State private var showingLynchSheet: Bool = false
     @State private var lynchAvailable: Bool = false
     
-//    @State private var attackedPlayerName: String = ""
-//    @State private var rescuedPlayerName: String = ""
-    
-    @State private var nightlyRoles = ["Mafia", "Doctor", "Serial Killer", "Lawyer", "Barman"]
-    @State private var nightlyChoices = [-1, -1, -1, -1, -1]
+    @State private var nightlyRoles = ["Mafia", "Doctor", "Serial Killer", "Lawyer", "Barman", "Cupid"]
+    @State private var nightlyChoices = ["", "", "", "", ""]
     
     @State private var currentEvents: [String] = []
     
-//    @State var lovers: [String] = []
-    
-    @State var index = 0
+    @State var currentRoleIndex = 0
     
     //
     // PrepareForNewRound
@@ -63,107 +38,132 @@ struct DirectorsView: View {
     func prepareForNewRound() -> Void {
         currentEvents.removeAll()
         for index in 0...nightlyChoices.count-1 {
-            nightlyChoices[index] = -1
+            nightlyChoices[index] = ""
         }
-        self.lynched = -1
-        self.protectedFromLynch = ""
+        self.playerBeingLynched = ""
+        self.playerProtectedFromLynch = ""
         self.currentRound += 1
         self.lynchAvailable = false
-        self.index = 0
+        self.currentRoleIndex = 0
         self.isNight.toggle()
     }
-    
     
     //
     // EvaluateEvents
     //  evaluate which players were eliminated
-    //  and store attacked/rescued players
+    //  and display events to the user
     //
     func evaluateEvents() -> Void {
         if !lynchAvailable {
-            
-            var inhibitedRole = ""
-            var attackedByMafia = ""
-            var treatedByDoctor = ""
-            var attackedByKiller = ""
-            
-            if nightlyChoices[0] >= 0 { // mafia made an attack
-                attackedByMafia = gameData.activePlayers[nightlyChoices[0]]
-                currentEvents.append("\(attackedByMafia) was attacked by the Mafia")
-            }
-            if nightlyChoices[1] >= 0 { // doctor made a rescue
-                treatedByDoctor = gameData.activePlayers[nightlyChoices[1]]
-                currentEvents.append("\(treatedByDoctor) was treated by the Doctor")
-            }
-            if nightlyChoices[2] >= 0 {
-                attackedByKiller = gameData.activePlayers[nightlyChoices[2]]
-                currentEvents.append("\(attackedByKiller) was attacked by the Serial Killer")
-            }
-            if nightlyChoices[3] >= 0 {
-                protectedFromLynch = gameData.activePlayers[nightlyChoices[3]]
-                currentEvents.append("\(protectedFromLynch) is protected from lynching by the Lawyer")
-            }
-            if nightlyChoices[4] >= 0 {
-                let inhibitedPlayer = gameData.activePlayers[nightlyChoices[4]]
-                inhibitedRole = gameData.roles[gameData.playerNames.firstIndex(of: inhibitedPlayer)!]
-                if inhibitedRole != "Civilian" {
-                    currentEvents.append("\(inhibitedRole) (\(inhibitedPlayer)) was inhibited by the Barman")
-                    switch inhibitedRole {
-                    case "Mafia": attackedByMafia = ""
-                    case "Doctor": treatedByDoctor = ""
-                    case "Serial Killer": attackedByKiller = ""
-                    case "Lawyer": protectedFromLynch = ""
-                    default: break
-                    }
-                }
-            }
-            
-            if attackedByMafia != "" { // mafia attacked a player
-                let attackedPlayerRole = gameData.roles[gameData.playerNames.firstIndex(of: attackedByMafia)!]
-                if attackedPlayerRole == "Grandma with a Shotgun" && inhibitedRole != "Grandma with a Shotgun" { // random mafia member is killed
-                    var aliveMafiaMembers: [String] = []
-                    for index in 0...gameData.playerNames.count-1 {
-                        if gameData.roles[index] == "Mafia" && gameData.isActive[index]{
-                            aliveMafiaMembers.append(gameData.playerNames[index])
-                        }
-                    }
-                    let killedMafiaMember = aliveMafiaMembers.randomElement()
-                    eliminatePlayer(playerName: killedMafiaMember!, treatedByDoctor: treatedByDoctor)
-                }
-                else if attackedByMafia != treatedByDoctor {  // player is killed by mafia
-                    eliminatePlayer(playerName: attackedByMafia, treatedByDoctor: treatedByDoctor)
-                }
-            }
-            
-            if attackedByKiller != "" && attackedByKiller != treatedByDoctor { // serial killer attacked player not treated by doctor
-                eliminatePlayer(playerName: attackedByKiller, treatedByDoctor: treatedByDoctor)
-            }
-            
-            if attackedByMafia != "" && attackedByMafia == attackedByKiller && attackedByKiller == treatedByDoctor {   // if both serial killer and mafia attacked player treated by doctor, eliminate the player
-                eliminatePlayer(playerName: attackedByMafia, treatedByDoctor: treatedByDoctor)
-            }
+            processPlayerChoices()
+            handleAttacks()
             lynchAvailable.toggle()
         }
-        else {  // performing lynch
-            if lynched != -1 {
-                let playerBeingLynched = gameData.activePlayers[lynched]
-                if protectedFromLynch != playerBeingLynched {
-                    eliminatePlayer(playerName: playerBeingLynched, treatedByDoctor: "")
+        else {
+            handleLynch()
+        }
+    }
+    
+    //
+    // ProcessPlayerChoices
+    //  collect and display all choices that were made
+    //  by special-role players during the night
+    //
+    func processPlayerChoices() -> Void {
+        if nightlyChoices[0] != "" { // mafia made an attack
+            currentEvents.append("\(nightlyChoices[0]) was attacked by the Mafia")
+        }
+        if nightlyChoices[1] != "" { // doctor made a rescue
+            currentEvents.append("\(nightlyChoices[1]) was treated by the Doctor")
+        }
+        if nightlyChoices[2] != "" {
+            currentEvents.append("\(nightlyChoices[2]) was attacked by the Serial Killer")
+        }
+        if nightlyChoices[3] != "" {
+            currentEvents.append("\(nightlyChoices[3]) is protected from lynching by the Lawyer")
+        }
+        if nightlyChoices[4] != "" {
+            let inhibitedPlayer = nightlyChoices[4]
+            let inhibitedRole = gameData.roles[gameData.playerNames.firstIndex(of: inhibitedPlayer)!]
+            if inhibitedRole != "Civilian" {
+                currentEvents.append("\(inhibitedRole) (\(inhibitedPlayer)) was inhibited by the Barman")
+                switch inhibitedRole {
+                case "Mafia": nightlyChoices[0] = ""
+                case "Doctor": nightlyChoices[1] = ""
+                case "Serial Killer": nightlyChoices[2] = ""
+                case "Lawyer": nightlyChoices[3] = ""
+                default: break
                 }
-                else {
-                    currentEvents.append("\(playerBeingLynched) could not be lynched")
-                }
-                lynchAvailable.toggle()
             }
         }
     }
     
+    //
+    // HandleAttacks
+    //  determine the outcomes for all possible
+    //  situations of a player being attacked
+    //
+    func handleAttacks() -> Void {
+        let attackedByMafia = nightlyChoices[0]
+        let treatedByDoctor = nightlyChoices[1]
+        let attackedByKiller = nightlyChoices[2]
+        playerProtectedFromLynch = nightlyChoices[3]
+        let inhibitedPlayer = nightlyChoices[4]
+        var inhibitedRole = ""
+        if inhibitedPlayer != "" {
+            inhibitedRole = gameData.roles[gameData.playerNames.firstIndex(of: inhibitedPlayer)!]
+        }
+        
+        if attackedByMafia != "" { // mafia attacked a player
+            let attackedPlayerRole = gameData.roles[gameData.playerNames.firstIndex(of: attackedByMafia)!]
+            if attackedPlayerRole == "Grandma with a Shotgun" && inhibitedRole != "Grandma with a Shotgun" { // random mafia member is killed
+                var aliveMafiaMembers: [String] = []
+                for index in 0...gameData.playerNames.count-1 {
+                    if gameData.roles[index] == "Mafia" && gameData.isActive[index]{
+                        aliveMafiaMembers.append(gameData.playerNames[index])
+                    }
+                }
+                let killedMafiaMember = aliveMafiaMembers.randomElement()
+                eliminatePlayer(playerName: killedMafiaMember!, treatedByDoctor: treatedByDoctor)
+            }
+            else if attackedByMafia != treatedByDoctor {  // player is killed by mafia
+                eliminatePlayer(playerName: attackedByMafia, treatedByDoctor: treatedByDoctor)
+            }
+        }
+        
+        if attackedByKiller != "" && attackedByKiller != treatedByDoctor { // serial killer attacked player not treated by doctor
+            eliminatePlayer(playerName: attackedByKiller, treatedByDoctor: treatedByDoctor)
+        }
+        
+        if attackedByMafia != "" && attackedByMafia == attackedByKiller && attackedByKiller == treatedByDoctor {   // if both serial killer and mafia attacked player treated by doctor, eliminate the player
+            eliminatePlayer(playerName: attackedByMafia, treatedByDoctor: treatedByDoctor)
+        }
+    }
+    
+    //
+    // HandleLynch
+    //  eliminate a player if chosen by the community
+    //  to be lynched while player is not protected
+    //
+    func handleLynch() -> Void {
+        if playerBeingLynched != "" {
+            if playerBeingLynched != playerProtectedFromLynch {
+                eliminatePlayer(playerName: playerBeingLynched, treatedByDoctor: "")
+            }
+            else {
+                currentEvents.append("\(playerBeingLynched) could not be playerBeingLynched")
+            }
+            lynchAvailable.toggle()
+        }
+    }
     
     //
     // EliminatePlayer
     //  remove player from activePlayers list
     //  and update the isActive list to display
     //  an elimination symbol beside the player name
+    //
+    //  also eliminate the player's lover if he/she has one
     //
     func eliminatePlayer(playerName: String, treatedByDoctor: String) -> Void {
         var index = gameData.activePlayers.firstIndex(of: playerName)
@@ -172,6 +172,16 @@ struct DirectorsView: View {
         gameData.isActive[index!] = false
         currentEvents.append("\(playerName) has died")
         
+        checkForLover(playerName: playerName, treatedByDoctor: treatedByDoctor)
+    }
+    
+    //
+    // CheckForLover
+    //  check if given player has a lover.
+    //  if the lover is not treated by the doctor,
+    //  then eliminate the lover
+    //
+    func checkForLover(playerName: String, treatedByDoctor: String) -> Void {
         if gameData.lovers.contains(playerName) {
             var lover: String
             if gameData.lovers[0] == playerName {
@@ -188,7 +198,6 @@ struct DirectorsView: View {
         }
     }
     
-    
     //
     // PresentResults
     //  display all events that occurred in the previous round
@@ -201,7 +210,6 @@ struct DirectorsView: View {
         )
     }
     
-    
     //
     // UpdateView
     //  after returning to Day View, call functions to:
@@ -212,12 +220,76 @@ struct DirectorsView: View {
     func updateView() -> Void {
         if self.currentRound > 1 {
             self.evaluateEvents()
-            if self.lynchAvailable {
-                self.showingResults.toggle()
+//            if self.lynchAvailable {
+                self.showingResultsSheet.toggle()
+//            }
+        }
+    }
+    
+    
+    //
+    // IsSelected
+    //  provide a bool for the selection list
+    //  to determine whether a player is selected or not
+    //
+    func isSelected(player: String) -> Bool {
+        if nightlyRoles[self.currentRoleIndex] == "Cupid" {
+            return (self.gameData.lovers.contains(player))
+        }
+        else {
+            return (self.nightlyChoices[self.currentRoleIndex] == player)
+        }
+    }
+    
+    //
+    // SelectionAction
+    //  provide the action() function for the selection list
+    //  to determine which elements to update
+    //  if an item is selected/deselected
+    //
+    func selectionAction(player: String) -> Void {
+        if nightlyRoles[self.currentRoleIndex] == "Cupid" {
+            if self.gameData.lovers.contains(player) {
+                self.gameData.lovers.removeAll(where: { $0 == player })
+            }
+            else {
+                self.gameData.lovers.append(player)
+            }
+        }
+        else {
+            if self.nightlyChoices[self.currentRoleIndex] == player {
+                self.nightlyChoices[self.currentRoleIndex] = ""
+            }
+            else {
+                self.nightlyChoices[self.currentRoleIndex] = player
             }
         }
     }
     
+    //
+    // UpdateSelectionView
+    //  update the selection view for the next players/role
+    //  to make their choice
+    //  if all players have chosen, exit the selection view
+    //
+    func updateSelectionView() -> Void {
+        repeat {
+            self.currentRoleIndex += 1
+            if self.currentRound == 2 {
+                if self.currentRoleIndex >= 6 {
+                    self.isNight.toggle()
+                    break
+                }
+            }
+            else {
+                if self.currentRoleIndex >= 5 {
+                    self.isNight.toggle()
+                    break
+                }
+            }
+        }
+        while ( !(self.gameData.roles.contains(self.nightlyRoles[self.currentRoleIndex]) && self.gameData.isActive[self.gameData.roles.firstIndex(of: self.nightlyRoles[self.currentRoleIndex])!]))
+    }
     
     //
     // CreateDayView
@@ -241,7 +313,7 @@ struct DirectorsView: View {
                     
                     if lynchAvailable {
                         Spacer()
-                        Button(action: {self.isLynching.toggle()}) {
+                        Button(action: {self.showingLynchSheet.toggle()}) {
                             Text("Lynch")
                         }
                     }
@@ -251,13 +323,12 @@ struct DirectorsView: View {
                 
                 Text("Round: \(currentRound)")
                     .onAppear(perform: {self.updateView()})
-                    .sheet(isPresented: self.$showingResults) {
+                    .sheet(isPresented: self.$showingResultsSheet) {
                         self.presentResults()
                 }
             }
         )
     }
-    
     
     //
     // CreateNightView
@@ -267,68 +338,33 @@ struct DirectorsView: View {
     func createNightView() -> some View {
         return (
             VStack {
-
                 Group {
+                    Text("Who does \(self.nightlyRoles[currentRoleIndex]) choose?")
                     List {
-                        Text("Who does \(self.nightlyRoles[index])")
                         ForEach(self.gameData.activePlayers, id: \.self) { player in
-                            MultipleSelectionRow(title: player, isSelected: self.nightlyChoices[self.index] != -1 && self.gameData.activePlayers[self.nightlyChoices[self.index]]==player) {
-                                if self.nightlyChoices[self.index] != -1 && self.gameData.activePlayers[self.nightlyChoices[self.index]] == player {
-                                    self.nightlyChoices[self.index] = -1
-                                }
-                                else {
-                                    self.nightlyChoices[self.index] = self.gameData.activePlayers.firstIndex(of: player)!
-                                }
+                            SelectionRow(title: player, isSelected: self.isSelected(player: player)) {
+                                self.selectionAction(player: player)
                             }
                         }
                     }
                 }
-                
-                
-//                Group {
-//                    if self.currentRound == 2 {
-//                        List {
-//                            ForEach(self.gameData.playerNames, id: \.self) { player in
-//                                MultipleSelectionRow(title: player, isSelected: self.gameData.lovers.contains(player)) {
-//                                    if self.gameData.lovers.contains(player) {
-//                                        self.gameData.lovers.removeAll(where: { $0 == player })
-//                                    }
-//                                    else {
-//                                        self.gameData.lovers.append(player)
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-                
 
                 Form {
-                    ForEach(nightlyRoles.indices, id: \.self) {index in
+                    ForEach(nightlyChoices.indices, id: \.self) {index in
                         Group {
-                            if self.nightlyChoices[index] >= 0 {
-                                Text("\(self.nightlyRoles[index]) chose \(self.gameData.activePlayers[self.nightlyChoices[index]])")
+                            if self.nightlyChoices[index] != "" {
+                                Text("\(self.nightlyRoles[index]) chose \(self.nightlyChoices[index])")
                             }
                         }
                     }
                 }
 
-                Button(action: {
-                    repeat {
-                        self.index += 1
-                        if self.index >= 5 {
-                            self.isNight.toggle()
-                            break
-                        }
-                    }
-                    while ( !(self.gameData.roles.contains(self.nightlyRoles[self.index]) && self.gameData.isActive[self.gameData.roles.firstIndex(of: self.nightlyRoles[self.index])!]))
-                }) {
+                Button(action: {self.updateSelectionView()}) {
                     Text("Confirm")
                 }
             }
         )
     }
-    
     
     //
     // CreateLynchView
@@ -339,30 +375,32 @@ struct DirectorsView: View {
     func createLynchView() -> some View {
         return (
             VStack {
-                NavigationView {
-                    Form {
-                        Text("Who does the Community lynch?")
-                        Picker(selection: self.$lynched, label: Text("")) {
-                            ForEach(0 ..< self.gameData.activePlayers.count) {
-                                Text(self.gameData.activePlayers[$0])
-                           }
+                Text("Who does the community lynch?")
+                List {
+                    ForEach(self.gameData.activePlayers, id: \.self) { player in
+                        SelectionRow(title: player, isSelected: self.playerBeingLynched == player) {
+                            if self.playerBeingLynched == player {
+                                self.playerBeingLynched = ""
+                            }
+                            else {
+                                self.playerBeingLynched = player
+                            }
                         }
                     }
                 }
                 
                 Form {
-                    if lynched >= 0 {
-                        Text("Lynched: \(self.gameData.activePlayers[lynched])")
+                    if playerBeingLynched != "" {
+                        Text("Community chose: \(self.playerBeingLynched)")
                     }
                 }
                 
-                Button(action: {self.isLynching.toggle()}) {
+                Button(action: {self.showingLynchSheet.toggle()}) {
                     Text("Confirm")
                 }
             }
         )
     }
-    
     
     //
     // Body:
@@ -370,7 +408,7 @@ struct DirectorsView: View {
     //
     var body: some View {
         Group {
-            if !isNight && !isLynching {
+            if !isNight && !showingLynchSheet {
                 createDayView()
             }
             else if isNight {
@@ -390,3 +428,20 @@ struct DirectorsView_Previews: PreviewProvider {
     }
 }
 
+struct SelectionRow: View {
+    var title: String
+    var isSelected: Bool
+    var action: () -> Void
+
+    var body: some View {
+        Button(action: self.action) {
+            HStack {
+                Text(self.title)
+                if self.isSelected {
+                    Spacer()
+                    Image(systemName: "checkmark")
+                }
+            }
+        }
+    }
+}
