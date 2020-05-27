@@ -17,12 +17,23 @@ struct ContentView: View {
     //  content and behavior of ContentView
     //
     var body: some View {
-        NavigationView {
-            NavigationLink(destination: GameSetupView()) {
-                Text("Start Game")
-            }
-            .navigationBarTitle("Mafia")
-        }
+         NavigationView {
+                   ZStack {
+                       Image("homeViewBackground")
+                           .resizable()
+                           .edgesIgnoringSafeArea(.all)
+                           .aspectRatio(contentMode: .fill)
+                       NavigationLink(destination: GameSetupView()) {
+                           Text("Start Game")
+                               .fontWeight(.bold)
+                               .foregroundColor(Color.white)
+                               
+                       }
+                       .navigationBarTitle("")
+                       .navigationBarHidden(true)
+                   }
+               }
+//               .background(Color.black)
     }
 }
 

@@ -151,7 +151,7 @@ struct DirectorsView: View {
                 eliminatePlayer(playerName: playerBeingLynched, treatedByDoctor: "")
             }
             else {
-                currentEvents.append("\(playerBeingLynched) could not be playerBeingLynched")
+                currentEvents.append("\(playerBeingLynched) could not be lynched")
             }
             lynchAvailable.toggle()
         }
@@ -204,9 +204,17 @@ struct DirectorsView: View {
     //
     func presentResults() -> some View {
         return (
-            List(currentEvents, id: \.self) { event in
-                Text(event)
+            VStack {
+                Text("Round Events")
+                    .font(.title)
+                List(currentEvents, id: \.self) { event in
+                    Text(event)
+                }
+                .background(Color.green)
+                .opacity(0.6)
             }
+            .padding()
+            .background(Color.gray)
         )
     }
     
@@ -298,34 +306,55 @@ struct DirectorsView: View {
     //
     func createDayView() -> some View {
         return (
-            VStack {
-                Text("Directors View")
-                    .font(.title)
-
-                List(gameData.playerNames.indices, id: \.self) { index in
-                    PlayerRow(index: index, isActive: self.gameData.isActive[index])
-                }
+            ZStack {
+            Image("homeViewBackground")
+            .resizable()
+            .edgesIgnoringSafeArea(.all)
+            .aspectRatio(contentMode: .fill)
                 
-                HStack {
-                    Button(action: {self.prepareForNewRound()}) {
-                        Text("Begin Night")
-                    }
+                VStack {
                     
-                    if lynchAvailable {
-                        Spacer()
-                        Button(action: {self.showingLynchSheet.toggle()}) {
-                            Text("Lynch")
+                    Text("Players")
+                        .font(.title)
+                        .foregroundColor(Color.white)
+                    
+                    Divider()
+
+                    List(gameData.playerNames.indices, id: \.self) { index in
+                        PlayerRow(index: index, isActive: self.gameData.isActive[index])
+                    }
+                    .background(Color.gray)
+                    .opacity(0.60)
+                    
+                    HStack {
+                        Button(action: {self.prepareForNewRound()}) {
+                            Text("Begin Night")
+                                .foregroundColor(Color.white)
+                        }
+                        
+                        if lynchAvailable {
+                            Spacer()
+                            Button(action: {self.showingLynchSheet.toggle()}) {
+                                Text("Lynch")
+                                    .foregroundColor(Color.white)
+                            }
                         }
                     }
+                    .padding()
+                    .padding()
+                    
+                    Divider()
+                    
+                    Text("Round: \(currentRound)")
+                        .foregroundColor(Color.white)
+                        .onAppear(perform: {self.updateView()})
+                        .sheet(isPresented: self.$showingResultsSheet) {
+                            self.presentResults()
+                    }
                 }
+                .navigationBarTitle("")
+                .navigationBarHidden(true)
                 .padding()
-                .padding()
-                
-                Text("Round: \(currentRound)")
-                    .onAppear(perform: {self.updateView()})
-                    .sheet(isPresented: self.$showingResultsSheet) {
-                        self.presentResults()
-                }
             }
         )
     }
@@ -337,31 +366,49 @@ struct DirectorsView: View {
     //
     func createNightView() -> some View {
         return (
-            VStack {
-                Group {
-                    Text("Who does \(self.nightlyRoles[currentRoleIndex]) choose?")
-                    List {
-                        ForEach(self.gameData.activePlayers, id: \.self) { player in
-                            SelectionRow(title: player, isSelected: self.isSelected(player: player)) {
-                                self.selectionAction(player: player)
+            ZStack {
+            Image("homeViewBackground")
+            .resizable()
+            .edgesIgnoringSafeArea(.all)
+            .aspectRatio(contentMode: .fill)
+                
+                VStack {
+                    Group {
+                        Text("Who does \(self.nightlyRoles[currentRoleIndex]) choose?")
+                            .font(.title)
+                            .foregroundColor(Color.white)
+                        List {
+                            ForEach(self.gameData.activePlayers, id: \.self) { player in
+                                SelectionRow(title: player, isSelected: self.isSelected(player: player)) {
+                                    self.selectionAction(player: player)
+                                }
+                            }
+                        }
+                        .background(Color.blue)
+                        .opacity(0.60)
+                    }
+
+                    Form {
+                        ForEach(nightlyChoices.indices, id: \.self) {index in
+                            Group {
+                                if self.nightlyChoices[index] != "" {
+                                    Text("\(self.nightlyRoles[index]) chose \(self.nightlyChoices[index])")
+                                }
                             }
                         }
                     }
-                }
+                    .background(Color.red)
+                    .opacity(0.60)
+                    
 
-                Form {
-                    ForEach(nightlyChoices.indices, id: \.self) {index in
-                        Group {
-                            if self.nightlyChoices[index] != "" {
-                                Text("\(self.nightlyRoles[index]) chose \(self.nightlyChoices[index])")
-                            }
-                        }
+                    Button(action: {self.updateSelectionView()}) {
+                        Text("Confirm")
                     }
                 }
-
-                Button(action: {self.updateSelectionView()}) {
-                    Text("Confirm")
-                }
+                .padding()
+                .padding()
+                .navigationBarTitle("")
+                .navigationBarHidden(true)
             }
         )
     }
@@ -374,30 +421,47 @@ struct DirectorsView: View {
     //
     func createLynchView() -> some View {
         return (
-            VStack {
-                Text("Who does the community lynch?")
-                List {
-                    ForEach(self.gameData.activePlayers, id: \.self) { player in
-                        SelectionRow(title: player, isSelected: self.playerBeingLynched == player) {
-                            if self.playerBeingLynched == player {
-                                self.playerBeingLynched = ""
-                            }
-                            else {
-                                self.playerBeingLynched = player
+            ZStack {
+            Image("homeViewBackground")
+            .resizable()
+            .edgesIgnoringSafeArea(.all)
+            .aspectRatio(contentMode: .fill)
+                
+                VStack {
+                    Text("Who does the community lynch?")
+                        .font(.title)
+                        .foregroundColor(Color.white)
+                    List {
+                        ForEach(self.gameData.activePlayers, id: \.self) { player in
+                            SelectionRow(title: player, isSelected: self.playerBeingLynched == player) {
+                                if self.playerBeingLynched == player {
+                                    self.playerBeingLynched = ""
+                                }
+                                else {
+                                    self.playerBeingLynched = player
+                                }
                             }
                         }
                     }
-                }
-                
-                Form {
-                    if playerBeingLynched != "" {
-                        Text("Community chose: \(self.playerBeingLynched)")
+                    .background(Color.blue)
+                    .opacity(0.60)
+                    
+                    Form {
+                        if playerBeingLynched != "" {
+                            Text("Community chose: \(self.playerBeingLynched)")
+                        }
+                    }
+                    .background(Color.red)
+                    .opacity(0.60)
+                    
+                    Button(action: {self.showingLynchSheet.toggle()}) {
+                        Text("Confirm")
                     }
                 }
-                
-                Button(action: {self.showingLynchSheet.toggle()}) {
-                    Text("Confirm")
-                }
+                .padding()
+                .padding()
+                .navigationBarTitle("")
+                .navigationBarHidden(true)
             }
         )
     }

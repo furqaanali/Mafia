@@ -105,23 +105,43 @@ struct DistributionView: View {
     //
     func createDistributionView() -> some View {
         return (
-            VStack {
-                Text("Distribution Screen")
+            ZStack {
+            Image("anonymous")
+            .resizable()
+            .edgesIgnoringSafeArea(.all)
+            .aspectRatio(contentMode: .fill)
+                VStack {
+                    
+                    HStack {
+                        Text("Player #\(self.currentIndex + 2)")
+                            .font(.headline)
+                            .fontWeight(.bold)
+                            .foregroundColor(Color.white)
+                        Spacer()
+                    }
                     .onAppear(perform: self.generateRoles)
-//                    .onDisappear(perform: self.clearRoles)
-                
-                
-                Text("Player #\(self.currentIndex + 2)")
-                
-                TextField("Enter your name", text: $currentPlayer)
-                
-                Button(action: {self.updateForNextPlayer()}) {
-                    Text("View Role")
+                    
+                    
+                    TextField("Enter your name", text: $currentPlayer)
+                        .background(Color.white)
+                        .opacity(0.8)
+//                        .foregroundColor(Color.white)
+                        .font(.headline)
+                    
+                    Divider()
+                    
+                    Button(action: {self.updateForNextPlayer()}) {
+                        Text("View Role")
+                    }
+                    // DESIGN OPTIONS: ACTION SHEET, SHEET, ALERT
+                    .alert(isPresented: $showingRole) {
+                        Alert(title: Text("\(self.gameData.playerNames[currentIndex])"), message: Text("\(self.gameData.roles[currentIndex])"), dismissButton: .default(Text("Close")) {self.checkDistributionComplete()})
+                    }
                 }
-                // DESIGN OPTIONS: ACTION SHEET, SHEET, ALERT
-                .alert(isPresented: $showingRole) {
-                    Alert(title: Text("\(self.gameData.playerNames[currentIndex]), you are"), message: Text("\(self.gameData.roles[currentIndex])"), dismissButton: .default(Text("Close")) {self.checkDistributionComplete()})
-                }
+                .padding()
+                .padding()
+                .navigationBarTitle("")
+                .navigationBarHidden(true)
             }
         )
     }
@@ -137,25 +157,53 @@ struct DistributionView: View {
     //
     func createTransitionView() -> some View {
         return (
-            VStack {
-                if !isPasswordValid {
-                    Text("Return to Director")
+            ZStack {
+            Image("lockImage")
+            .resizable()
+            .edgesIgnoringSafeArea(.all)
+            .aspectRatio(contentMode: .fill)
                 
-                    TextField("Enter Game Password", text: $password)
+                VStack {
+                    Spacer()
                     
-                    Button(action: {self.validatePassword()}) {
-                        Text("Submit Password")
+                    if !isPasswordValid {
+                        Text("Return Phone to Director")
+                    
+                        TextField("Enter Game Password", text: $password)
+                            .background(Color.white)
+                            .opacity(0.85)
+                            .foregroundColor(Color.black)
+                            .font(.headline)
+                        
+                        Button(action: {self.validatePassword()}) {
+                            HStack {
+                                Image(systemName: "lock")
+                                Text("Submit Password")
+                            }
+                        }
+                        .alert(isPresented: $showingPasswordRejected) {
+                        Alert(title: Text("Incorrect Password"), message: Text("Please enter the password that was created earlier in the game"), dismissButton: .default(Text("Close")))
+                        }
+                        .padding()
+                        .foregroundColor(.white)
+                        .background(Color.blue)
+                        .opacity(0.85)
+                        .cornerRadius(40)
+                        
                     }
-                    .alert(isPresented: $showingPasswordRejected) {
-                    Alert(title: Text("Incorrect Password"), message: Text("Please enter the password that was created earlier in the game"), dismissButton: .default(Text("Close")))
+                    
+                    else {
+                        NavigationLink(destination: DirectorsView()) {
+                            Text("Continue to Directors Screen")
+                        }
                     }
+                    
+                    Divider()
                 }
-                
-                else {
-                    NavigationLink(destination: DirectorsView()) {
-                        Text("Continue to Directors Screen")
-                    }
-                }
+                .padding()
+                .padding()
+                .navigationBarTitle("")
+                .navigationBarHidden(true)
             }
         )
     }

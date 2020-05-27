@@ -99,46 +99,59 @@ struct GameSetupView: View {
     //
     func createDataCollectionView() -> some View {
         return (
-            VStack {
-                Stepper(value: self.$numPlayers, in: 4...25) {
-                    Text("Players: \(self.numPlayers)")
+            ZStack {
+                Image("homeViewBackground")
+                .resizable()
+                .edgesIgnoringSafeArea(.all)
+                .aspectRatio(contentMode: .fill)
+                
+                VStack {
+                    
+                    Stepper(value: self.$numPlayers, in: 4...25) {
+                        Text("Players: \(self.numPlayers)")
+                    }
+                    Stepper(value: self.$numMafia, in: 1...4) {
+                        Text("Mafia: \(self.numMafia)")
+                    }
+                    Toggle(isOn: self.$includeBarman) {
+                        Text("Barman")
+                    }
+                    Toggle(isOn: self.$includeCupid) {
+                        Text("Cupid")
+                    }
+                    Toggle(isOn: self.$includeDetective) {
+                        Text("Detective")
+                    }
+                    Toggle(isOn: self.$includeDoctor) {
+                        Text("Doctor")
+                    }
+                    Toggle(isOn: self.$includeGrandma) {
+                        Text("Grandma with a Shotgun")
+                    }
+                    Toggle(isOn: self.$includeKiller) {
+                        Text("Serial Killer")
+                    }
+                    Toggle(isOn: self.$includeLawyer) {
+                        Text("Lawyer")
+                    }
+                    Button(action: {
+                        self.saveGameData()
+                    }) {
+                        Text("Continue")
+                    }
+                    .alert(isPresented: $showInvalidAlert) {
+                    Alert(title: Text("Invalid Settings"), message: Text("There are more roles than the given player count"), dismissButton: .default(Text("Close")))
+                    }
                 }
-                Stepper(value: self.$numMafia, in: 1...4) {
-                    Text("Mafia: \(self.numMafia)")
-                }
-                Toggle(isOn: self.$includeBarman) {
-                    Text("Barman")
-                }
-                Toggle(isOn: self.$includeCupid) {
-                    Text("Cupid")
-                }
-                Toggle(isOn: self.$includeDetective) {
-                    Text("Detective")
-                }
-                Toggle(isOn: self.$includeDoctor) {
-                    Text("Doctor")
-                }
-                Toggle(isOn: self.$includeGrandma) {
-                    Text("Grandma with a Shotgun")
-                }
-                Toggle(isOn: self.$includeKiller) {
-                    Text("Serial Killer")
-                }
-                Toggle(isOn: self.$includeLawyer) {
-                    Text("Lawyer")
-                }
-                Button(action: {
-                    self.saveGameData()
-                }) {
-                    Text("Continue")
-                }
-                .alert(isPresented: $showInvalidAlert) {
-                Alert(title: Text("Invalid Settings"), message: Text("There are more roles than the given player count"), dismissButton: .default(Text("Close")))
-                }
+                .foregroundColor(Color.white)
+                .padding()
+                .padding()
+                .navigationBarTitle("")
+                .navigationBarHidden(true)
             }
-            .padding()
-            .padding()
-            .navigationBarTitle("Players")
+            
+            
+//            .background(Color.gray)
         )
     }
     
@@ -149,20 +162,56 @@ struct GameSetupView: View {
     //
     func createPasswordCreationView() -> some View {
         return (
-            VStack {
-                if !passwordAccepted {
-                    TextField("Create A Password", text: $password)
-                    
-                    Button(action: {self.savePassword()}) {
-                        Text("Save Password")
+            ZStack {
+            Image("lockImage")
+            .resizable()
+            .edgesIgnoringSafeArea(.all)
+            .aspectRatio(contentMode: .fill)
+                
+                VStack {
+                    if !passwordAccepted {
+                        Spacer()
+                        
+                        TextField("Create A Password", text: $password)
+                            .background(Color.white)
+                            .opacity(0.85)
+                            .foregroundColor(Color.black)
+                            .font(.headline)
+                        
+                        
+                        Divider()
+                        
+                        Button(action: {self.savePassword()}) {
+                            HStack {
+                                Image(systemName: "lock")
+                                Text("Save Password")
+                            }
+                            .padding()
+                            .foregroundColor(.white)
+                            .background(Color.blue)
+                            .opacity(0.85)
+                            .cornerRadius(40)
+                        }
+                        
+                    }
+                        
+                    else {
+                        Spacer()
+                        NavigationLink(destination: DistributionView()) {
+                            Text("PLAY")
+                                .font(.title)
+                                .fontWeight(.black)
+                                .foregroundColor(Color.blue)
+                                .opacity(0.80)
+                        }
+                        Divider()
+                        Divider()
                     }
                 }
-                    
-                else {
-                    NavigationLink(destination: DistributionView()) {
-                        Text("Play")
-                    }
-                }
+                .padding()
+                .padding()
+                .navigationBarTitle("")
+                .navigationBarHidden(true)
             }
         )
     }

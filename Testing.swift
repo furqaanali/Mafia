@@ -118,82 +118,96 @@ struct Testing: View {
     
     @State var playerNames = ["Ayesha", "Farhan", "Furqaan", "Aamina"]
     @State var lover = ""
+    
+    @State var lynchAvailable: Bool = false
 
     var body: some View {
-        VStack {
-            List {
-                ForEach(self.playerNames, id: \.self) { player in
-                    SelectionRow(title: player, isSelected: self.playerNames[0] == player) {
-                        if self.lover.contains(player) {
-                            self.lover.removeAll()
-                        }
-                        else {
-                            self.lover.removeAll()
-                            self.lover.append(player)
-                        }
-                    }
-                }
-            }
-//            ForEach(myDictKeys.indices, id: \.self) { index in
-//                NavigationView {
-//                    Form {
-//                        Text("Who does \(self.myDictKeys[index]) choose?")
-//                        Picker(selection: self.$myDictVals[index], label: Text("hi")) {
-//                            ForEach(0 ..< self.mylist.count) {
-//                                Text(self.mylist[$0])
-//                           }
-//                        }
-//                    }
-////                    .frame(height: 200.0)
-//                }
-//            }
-//            Form {
-//                ForEach(myDictKeys.indices, id: \.self) {index in
-//                    Group {
-//                        if self.myDictVals[index] >= 0 {
-//                            Text(self.mylist[self.myDictVals[index]])
-//                        }
-//                    }
-//                }
-//            }
-//            HStack {
-//                Text("Hello")
-//                Text("Civilian")
-//                    .font(.caption)
-//                    .fontWeight(.light)
-//                    .foregroundColor(Color.pink)
-//
-//                Spacer()
-//            }
-//            List {
-//            Group {
-//                ForEach(myDict.sorted(by: >), id: \.key) { key, value in
-//                    NavigationView {
-//                        Form {
-//                            Text("Who does \(key) choose?")
-//                            Picker(selection: self.$myDict["Mafia"], label: Text("hi")) {
-//                                ForEach(0 ..< self.mylist.count) {
-//                                    Text(self.mylist[$0])
-//                               }
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//            Group {
-//            ForEach(myDict.sorted(by: >), id: \.key) { key, value in
-//                Group {
-//                    if value >= 0 {
-//                        Text("Attacked: \(value)")
-//                    }
-//                }
-////            }
-//            }
-//            Text(String(myDict.))
-//            Text(String(self.myDict["Doctor"]!))
-//            Text(String(self.myDict["Killer"]!))
-//            }
+        VStack{
+            Image(systemName: "person")
+            Image(systemName: "heart")
         }
+//        VStack {
+//            Text("Directors View")
+//                .font(.title)
+//
+//            Divider()
+//
+//            List(playerNames.indices, id: \.self) { index in
+//                PlayerRow(index: index, isActive: true)
+//            }
+//
+//            HStack {
+//                Button(action: {self.lynchAvailable.toggle()}) {
+//                    Text("Begin Night")
+//                }
+//
+//                if lynchAvailable {
+//                    Spacer()
+//                    Button(action: {self.lynchAvailable.toggle()}) {
+//                        Text("Lynch")
+//                    }
+//                }
+//            }
+//            .padding()
+//            .padding()
+//
+//            Text("Round: 1")
+//
+//        }
+//        .padding()
+//        .padding()
+//        Color.purple
+//        .edgesIgnoringSafeArea(.all)
+//        .overlay(
+//        VStack() {
+//
+//            Text("Hi")
+//        }
+//        GeometryReader { geometry in
+//            ZStack {
+//                Image("homeViewBackground")
+//                    .resizable()
+//                    .aspectRatio(geometry.size, contentMode: .fill)
+//                    .edgesIgnoringSafeArea(.all)
+//                VStack {
+//                    Text("BYE")
+//                    Text("HELLO")
+//                }
+//            }
+//        }
+//        NavigationView {
+//            ZStack {
+//                Image("homeViewBackground")
+//                    .edgesIgnoringSafeArea(.all)
+////                Color.red.edgesIgnoringSafeArea(.all)
+//                ScrollView {
+//                    Text("Example")
+//                }
+//                NavigationLink (destination: GameSetupView()) {
+//                    Text("Hi")
+//                }
+//                .navigationBarTitle("title")
+//            }
+//        }
+        
+//        NavigationView {
+//            ZStack {
+//                Image("homeViewBackground")
+//                    .resizable()
+//                    .edgesIgnoringSafeArea(.all)
+//                    .aspectRatio(contentMode: .fill)
+//                NavigationLink(destination: GameSetupView()) {
+//                    Text("Start Game")
+//                        .fontWeight(.bold)
+//                        .foregroundColor(Color.white)
+//
+//                }
+//                .navigationBarTitle("")
+//                .navigationBarHidden(true)
+//            }
+//        }
+//        .background(Color.black)
+
     }
 }
 
