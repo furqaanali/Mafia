@@ -17,22 +17,41 @@ struct ContentView: View {
     //  content and behavior of ContentView
     //
     var body: some View {
-         NavigationView {
-                   ZStack {
-                       Image("homeViewBackground")
-                           .resizable()
-                           .edgesIgnoringSafeArea(.all)
-                           .aspectRatio(contentMode: .fill)
-                       NavigationLink(destination: GameSetupView()) {
-                           Text("Start Game")
-                               .fontWeight(.bold)
-                               .foregroundColor(Color.white)
-                               
-                       }
-                       .navigationBarTitle("")
-                       .navigationBarHidden(true)
-                   }
-               }
+        NavigationView {
+            ZStack {
+                Image("mafiaBackground")
+                    .resizable()
+                    .edgesIgnoringSafeArea(.all)
+                    .aspectRatio(contentMode: .fill)
+                
+                VStack {
+                    Spacer()
+                    NavigationLink(destination: GameSetupView()) {
+                        Text("Start Game")
+                            .padding()
+                            .foregroundColor(Color.black)
+                            .background(Color.gray)
+                            .opacity(0.75)
+                            .cornerRadius(1000)
+                    }
+                    .navigationBarTitle("")
+                    .navigationBarHidden(true)
+                    
+//                    Spacer()
+                    Divider()
+                    Divider()
+                    
+                    Text("M A F I A")
+                        .font(.largeTitle)
+                        .fontWeight(.black)
+                        .foregroundColor(Color.gray)
+                        .opacity(0.8)
+                }
+                .padding()
+                .padding()
+                .padding()
+            }
+        }
 //               .background(Color.black)
     }
 }

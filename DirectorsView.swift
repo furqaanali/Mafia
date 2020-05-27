@@ -307,7 +307,7 @@ struct DirectorsView: View {
     func createDayView() -> some View {
         return (
             ZStack {
-            Image("homeViewBackground")
+            Image("mafiaBackground")
             .resizable()
             .edgesIgnoringSafeArea(.all)
             .aspectRatio(contentMode: .fill)
@@ -324,19 +324,29 @@ struct DirectorsView: View {
                         PlayerRow(index: index, isActive: self.gameData.isActive[index])
                     }
                     .background(Color.gray)
-                    .opacity(0.60)
+                    .opacity(0.80)
                     
                     HStack {
                         Button(action: {self.prepareForNewRound()}) {
                             Text("Begin Night")
+                                .fontWeight(.bold)
                                 .foregroundColor(Color.white)
+                                .padding()
+                                .background(Color.gray)
+                                .opacity(0.75)
+                                .cornerRadius(1000)
                         }
                         
                         if lynchAvailable {
                             Spacer()
                             Button(action: {self.showingLynchSheet.toggle()}) {
                                 Text("Lynch")
+                                    .fontWeight(.bold)
                                     .foregroundColor(Color.white)
+                                    .padding()
+                                    .background(Color.gray)
+                                    .opacity(0.75)
+                                    .cornerRadius(1000)
                             }
                         }
                     }
@@ -367,7 +377,7 @@ struct DirectorsView: View {
     func createNightView() -> some View {
         return (
             ZStack {
-            Image("homeViewBackground")
+            Image("mafiaBackground")
             .resizable()
             .edgesIgnoringSafeArea(.all)
             .aspectRatio(contentMode: .fill)
@@ -422,7 +432,7 @@ struct DirectorsView: View {
     func createLynchView() -> some View {
         return (
             ZStack {
-            Image("homeViewBackground")
+            Image("mafiaBackground")
             .resizable()
             .edgesIgnoringSafeArea(.all)
             .aspectRatio(contentMode: .fill)

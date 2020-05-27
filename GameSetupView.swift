@@ -100,52 +100,68 @@ struct GameSetupView: View {
     func createDataCollectionView() -> some View {
         return (
             ZStack {
-                Image("homeViewBackground")
+                Image("mafiaBackground")
                 .resizable()
                 .edgesIgnoringSafeArea(.all)
                 .aspectRatio(contentMode: .fill)
                 
                 VStack {
                     
-                    Stepper(value: self.$numPlayers, in: 4...25) {
-                        Text("Players: \(self.numPlayers)")
+                    VStack {
+                        Stepper(value: self.$numPlayers, in: 4...25) {
+                            Text("Players: \(self.numPlayers)")
+                        }
+                        Stepper(value: self.$numMafia, in: 1...4) {
+                            Text("Mafia: \(self.numMafia)")
+                        }
                     }
-                    Stepper(value: self.$numMafia, in: 1...4) {
-                        Text("Mafia: \(self.numMafia)")
+                    .padding()
+                    .foregroundColor(Color.black)
+                    .background(Color.white.opacity(0.5))
+                    
+                    VStack {
+                        Toggle(isOn: self.$includeBarman) {
+                            Text("Barman")
+                        }
+                        Toggle(isOn: self.$includeCupid) {
+                            Text("Cupid")
+                        }
+                        Toggle(isOn: self.$includeDetective) {
+                            Text("Detective")
+                        }
+                        Toggle(isOn: self.$includeDoctor) {
+                            Text("Doctor")
+                        }
+                        Toggle(isOn: self.$includeGrandma) {
+                            Text("Grandma with a Shotgun")
+                        }
+                        Toggle(isOn: self.$includeKiller) {
+                            Text("Serial Killer")
+                        }
+                        Toggle(isOn: self.$includeLawyer) {
+                            Text("Lawyer")
+                        }
                     }
-                    Toggle(isOn: self.$includeBarman) {
-                        Text("Barman")
-                    }
-                    Toggle(isOn: self.$includeCupid) {
-                        Text("Cupid")
-                    }
-                    Toggle(isOn: self.$includeDetective) {
-                        Text("Detective")
-                    }
-                    Toggle(isOn: self.$includeDoctor) {
-                        Text("Doctor")
-                    }
-                    Toggle(isOn: self.$includeGrandma) {
-                        Text("Grandma with a Shotgun")
-                    }
-                    Toggle(isOn: self.$includeKiller) {
-                        Text("Serial Killer")
-                    }
-                    Toggle(isOn: self.$includeLawyer) {
-                        Text("Lawyer")
-                    }
-                    Button(action: {
-                        self.saveGameData()
-                    }) {
+                    .padding()
+                    .background(Color.gray.opacity(0.5))
+                    .foregroundColor(Color.white)
+                    
+                    Divider()
+                    
+                    Button(action: {self.saveGameData()}) {
                         Text("Continue")
+                            .padding()
+                            .foregroundColor(Color.black)
+                            .background(Color.gray)
+                            .opacity(0.75)
+                            .cornerRadius(1000)
                     }
                     .alert(isPresented: $showInvalidAlert) {
                     Alert(title: Text("Invalid Settings"), message: Text("There are more roles than the given player count"), dismissButton: .default(Text("Close")))
                     }
                 }
-                .foregroundColor(Color.white)
                 .padding()
-                .padding()
+                .background(Color.black.opacity(0.3))
                 .navigationBarTitle("")
                 .navigationBarHidden(true)
             }

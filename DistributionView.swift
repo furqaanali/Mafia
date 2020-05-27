@@ -195,6 +195,11 @@ struct DistributionView: View {
                     else {
                         NavigationLink(destination: DirectorsView()) {
                             Text("Continue to Directors Screen")
+                                .padding()
+                                .foregroundColor(Color.white)
+                                .background(Color.blue)
+                                .opacity(0.85)
+                                .cornerRadius(40)
                         }
                     }
                     

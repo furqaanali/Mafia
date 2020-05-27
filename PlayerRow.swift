@@ -23,27 +23,27 @@ struct PlayerRow: View {
         HStack {
             Image(gameData.roles[index])
             .resizable()
-            .frame(width: 50, height: 50)
-//            .clipShape(Circle())
-//            .overlay(
-//                Circle().stroke(Color.white, lineWidth: 4))
-//            .shadow(radius: 10)
+            .frame(width: 40, height: 40)
+            .clipShape(Circle())
+            .overlay(
+                Circle().stroke(Color.black, lineWidth: 2))
+            .shadow(radius: 5)
+            
+            Divider()
+            
             Text(gameData.playerNames[index])
-//            Text(gameData.roles[index])
             
             Spacer()
             
             if gameData.lovers.contains(gameData.playerNames[index]) {
                 Image(systemName: "heart.fill")
                     .foregroundColor(Color.red)
-//                    .resizable()
-                    .frame(width: 50, height: 50)
             }
             
             if !isActive {
                 Image("Dead")
                 .resizable()
-                .frame(width: 50, height: 50)
+                .frame(width: 30, height: 30)
             }
         }
     }
