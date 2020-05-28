@@ -63,7 +63,8 @@ struct DirectorsView: View {
         self.playerProtectedFromLynch = ""
         self.currentRound += 1
         self.lynchAvailable = false
-        self.currentRoleIndex = 0
+        self.currentRoleIndex = -1
+        self.updateSelectionView()
         self.isNight.toggle()
     }
     
