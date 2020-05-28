@@ -29,6 +29,25 @@ struct DirectorsView: View {
     
     @State var currentRoleIndex = 0
     
+    
+    //
+    // Body:
+    //  content and behavior of DirectorsView
+    //
+    var body: some View {
+        Group {
+            if !isNight && !showingLynchSheet {
+                createDayView()
+            }
+            else if isNight {
+                createNightView()
+            }
+            else {
+                createLynchView()
+            }
+        }
+    }
+    
     //
     // PrepareForNewRound
     //  reset all roundly game values,
@@ -54,14 +73,17 @@ struct DirectorsView: View {
     //  and display events to the user
     //
     func evaluateEvents() -> Void {
-        if !lynchAvailable {
-            processPlayerChoices()
-            handleAttacks()
-            lynchAvailable.toggle()
+        if currentRound > 1 {
+            if !lynchAvailable {
+                processPlayerChoices()
+                handleAttacks()
+                lynchAvailable.toggle()
+            }
+            else {
+                handleLynch()
+            }
         }
-        else {
-            handleLynch()
-        }
+        
     }
     
     //
@@ -219,21 +241,50 @@ struct DirectorsView: View {
     }
     
     //
-    // UpdateView
-    //  after returning to Day View, call functions to:
-    //  process the previous Night's events,
-    //  update the current game info and view,
-    //  and trigger the presentResults() sheet
+    // CheckGameOver
+    //  if only Mafia remain, mafia win.
+    //  if only Serial Killer remains, Serial Killer wins.
+    //  if no Mafia or Serial Killer remain, the Town wins.
     //
-    func updateView() -> Void {
-        if self.currentRound > 1 {
-            self.evaluateEvents()
-//            if self.lynchAvailable {
-                self.showingResultsSheet.toggle()
-//            }
+    //  return string of who won
+    //
+    func checkGameOver() -> String {
+        var isMafiaPresent: Bool = false
+        var isSerialKillerPresent: Bool = false
+        var isTownsPeoplePresent: Bool = false
+        
+        if gameData.activePlayers.count == 0 {
+            return "NO ONE"
         }
+        
+        for index in 0...gameData.roles.count-1 {
+            if gameData.isActive[index] {
+                if gameData.roles[index] == "Mafia" {
+                    isMafiaPresent = true
+                }
+                else if gameData.roles[index] == "Serial Killer" {
+                    isSerialKillerPresent = true
+                }
+                else {
+                    isTownsPeoplePresent = true
+                }
+            }
+        }
+        
+        if isMafiaPresent && !isSerialKillerPresent && !isTownsPeoplePresent {
+            return "MAFIA"
+        }
+        else if !isMafiaPresent && isSerialKillerPresent && !isTownsPeoplePresent {
+            return "SERIAL KILLER"
+        }
+        else if !isMafiaPresent && !isSerialKillerPresent && isTownsPeoplePresent {
+            return "TOWNSMEN"
+        }
+        else {
+            return ""
+        }
+        
     }
-    
     
     //
     // IsSelected
@@ -307,40 +358,37 @@ struct DirectorsView: View {
     func createDayView() -> some View {
         return (
             ZStack {
-            Image("mafiaBackground")
-            .resizable()
-            .edgesIgnoringSafeArea(.all)
-            .aspectRatio(contentMode: .fill)
+                Image("mafiaBackground")
+                    .resizable()
+                    .edgesIgnoringSafeArea(.all)
+                    .aspectRatio(contentMode: .fill)
                 
                 VStack {
                     
-                    Text("Players")
-                        .font(.title)
+                    Text("PLAYERS")
                         .foregroundColor(Color.white)
+                        .fontWeight(.bold)
+                        .font(.title)
                     
-                    Divider()
-
                     List(gameData.playerNames.indices, id: \.self) { index in
                         PlayerRow(index: index, isActive: self.gameData.isActive[index])
                     }
                     .background(Color.gray)
                     .opacity(0.80)
                     
-                    HStack {
-                        Button(action: {self.prepareForNewRound()}) {
-                            Text("Begin Night")
-                                .fontWeight(.bold)
-                                .foregroundColor(Color.white)
-                                .padding()
-                                .background(Color.gray)
-                                .opacity(0.75)
-                                .cornerRadius(1000)
+                    Divider()
+                    
+                    if currentRound > 1 {
+                        Button(action: {self.showingResultsSheet = true}) {
+                            Text("View Round Events")
+                                .fontWeight(.heavy)
                         }
-                        
-                        if lynchAvailable {
-                            Spacer()
-                            Button(action: {self.showingLynchSheet.toggle()}) {
-                                Text("Lynch")
+                    }
+                    
+                    if checkGameOver() == "" {
+                        HStack {
+                            Button(action: {self.prepareForNewRound()}) {
+                                Text("Begin Night")
                                     .fontWeight(.bold)
                                     .foregroundColor(Color.white)
                                     .padding()
@@ -348,16 +396,41 @@ struct DirectorsView: View {
                                     .opacity(0.75)
                                     .cornerRadius(1000)
                             }
+                            
+                            if lynchAvailable {
+                                Spacer()
+                                Button(action: {self.showingLynchSheet.toggle()}) {
+                                    Text("Lynch")
+                                        .fontWeight(.bold)
+                                        .foregroundColor(Color.white)
+                                        .padding()
+                                        .background(Color.gray)
+                                        .opacity(0.75)
+                                        .cornerRadius(1000)
+                                }
+                            }
                         }
+                        .padding()
+                        .padding()
                     }
-                    .padding()
-                    .padding()
                     
-                    Divider()
+                    else {
+                        Divider()
+                        Text("GAME OVER:")
+                            .font(.title)
+                            .fontWeight(.bold)
+                            .foregroundColor(Color.green)
+                        Text("\(checkGameOver()) WON!")
+                            .font(.headline)
+                            .fontWeight(.bold)
+                            .foregroundColor(Color.green)
+                        Divider()
+                    }
+                    
                     
                     Text("Round: \(currentRound)")
                         .foregroundColor(Color.white)
-                        .onAppear(perform: {self.updateView()})
+                        .onAppear(perform: {self.evaluateEvents()})
                         .sheet(isPresented: self.$showingResultsSheet) {
                             self.presentResults()
                     }
@@ -377,10 +450,10 @@ struct DirectorsView: View {
     func createNightView() -> some View {
         return (
             ZStack {
-            Image("mafiaBackground")
-            .resizable()
-            .edgesIgnoringSafeArea(.all)
-            .aspectRatio(contentMode: .fill)
+                Image("mafiaBackground")
+                    .resizable()
+                    .edgesIgnoringSafeArea(.all)
+                    .aspectRatio(contentMode: .fill)
                 
                 VStack {
                     Group {
@@ -432,10 +505,10 @@ struct DirectorsView: View {
     func createLynchView() -> some View {
         return (
             ZStack {
-            Image("mafiaBackground")
-            .resizable()
-            .edgesIgnoringSafeArea(.all)
-            .aspectRatio(contentMode: .fill)
+                Image("mafiaBackground")
+                    .resizable()
+                    .edgesIgnoringSafeArea(.all)
+                    .aspectRatio(contentMode: .fill)
                 
                 VStack {
                     Text("Who does the community lynch?")
@@ -476,32 +549,14 @@ struct DirectorsView: View {
         )
     }
     
-    //
-    // Body:
-    //  content and behavior of DirectorsView
-    //
-    var body: some View {
-        Group {
-            if !isNight && !showingLynchSheet {
-                createDayView()
-            }
-            else if isNight {
-                createNightView()
-            }
-            else {
-                createLynchView()
-            }
-        }
-    }
-    
 }
 
-struct DirectorsView_Previews: PreviewProvider {
-    static var previews: some View {
-        DirectorsView()
-    }
-}
 
+//
+// SelectionRow
+//  creates a row that toggles a boolean value
+//  and updates the row appearance accordingly
+//
 struct SelectionRow: View {
     var title: String
     var isSelected: Bool
@@ -518,4 +573,5 @@ struct SelectionRow: View {
             }
         }
     }
+    
 }

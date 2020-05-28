@@ -24,6 +24,21 @@ struct DistributionView: View {
     
     
     //
+    // Body:
+    //  content and behavior of DistributionView
+    //
+    var body: some View {
+        Group {
+            if !finishedDistribution {
+                createDistributionView()
+            }
+            else {
+                createTransitionView()
+            }
+        }
+    }
+    
+    //
     // GenerateRoles:
     //  populate the roles list in the environment object
     //  with the appropriate number of roles
@@ -60,16 +75,14 @@ struct DistributionView: View {
     }
     
     //
-    // DisplayRole:
-    //  pop up a new view where the current player
-    //  can view his/her role
+    // CheckDistributionComplete
+    //  updates finishedDistribution value to true
+    //  if every player has recieved a role
     //
-    func displayRole() -> some View {
-        return (
-            VStack {
-                Text("Role: \(self.gameData.roles[currentIndex])")
-            }
-        )
+    func checkDistributionComplete() -> Void {
+        if self.currentIndex >= self.gameData.numPlayers - 1 {
+            self.finishedDistribution.toggle()
+        }
     }
     
     //
@@ -88,13 +101,14 @@ struct DistributionView: View {
     }
     
     //
-    // CheckDistributionComplete
-    //  updates finishedDistribution value to true
-    //  if every player has recieved a role
+    // ValidatePassword
     //
-    func checkDistributionComplete() -> Void {
-        if self.currentIndex >= self.gameData.numPlayers - 1 {
-            self.finishedDistribution.toggle()
+    func validatePassword() {
+        if password == gameData.password {
+            isPasswordValid = true
+        }
+        else {
+            showingPasswordRejected.toggle()
         }
     }
     
@@ -106,12 +120,12 @@ struct DistributionView: View {
     func createDistributionView() -> some View {
         return (
             ZStack {
-            Image("anonymous")
-            .resizable()
-            .edgesIgnoringSafeArea(.all)
-            .aspectRatio(contentMode: .fill)
+                Image("anonymous")
+                    .resizable()
+                    .edgesIgnoringSafeArea(.all)
+                    .aspectRatio(contentMode: .fill)
+                
                 VStack {
-                    
                     HStack {
                         Text("Player #\(self.currentIndex + 2)")
                             .font(.headline)
@@ -125,7 +139,6 @@ struct DistributionView: View {
                     TextField("Enter your name", text: $currentPlayer)
                         .background(Color.white)
                         .opacity(0.8)
-//                        .foregroundColor(Color.white)
                         .font(.headline)
                     
                     Divider()
@@ -153,15 +166,13 @@ struct DistributionView: View {
     //
     //  prevents roles from being compromised
     //
-    // TODO: password protect
-    //
     func createTransitionView() -> some View {
         return (
             ZStack {
-            Image("lockImage")
-            .resizable()
-            .edgesIgnoringSafeArea(.all)
-            .aspectRatio(contentMode: .fill)
+                Image("lockImage")
+                    .resizable()
+                    .edgesIgnoringSafeArea(.all)
+                    .aspectRatio(contentMode: .fill)
                 
                 VStack {
                     Spacer()
@@ -189,7 +200,6 @@ struct DistributionView: View {
                         .background(Color.blue)
                         .opacity(0.85)
                         .cornerRadius(40)
-                        
                     }
                     
                     else {
@@ -213,37 +223,4 @@ struct DistributionView: View {
         )
     }
     
-    //
-    // ValidatePassword
-    //
-    func validatePassword() {
-        if password == gameData.password {
-            isPasswordValid = true
-        }
-        else {
-            showingPasswordRejected.toggle()
-        }
-    }
-
-    //
-    // Body:
-    //  content and behavior of DistributionView
-    //
-    var body: some View {
-        Group {
-            if !finishedDistribution {
-                createDistributionView()
-            }
-            else {
-                createTransitionView()
-            }
-        }
-    }
-    
-}
-
-struct DistributionView_Previews: PreviewProvider {
-    static var previews: some View {
-        DistributionView()
-    }
 }

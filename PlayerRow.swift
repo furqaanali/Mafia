@@ -48,9 +48,3 @@ struct PlayerRow: View {
         }
     }
 }
-
-struct PlayerRow_Previews: PreviewProvider {
-    static var previews: some View {
-        PlayerRow(index: 0, isActive: false)
-    }
-}

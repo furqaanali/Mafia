@@ -1,5 +1,5 @@
 //
-//  ContentView.swift
+//  StartView.swift
 //  Mafia3
 //
 //  Created by Furqaan Ali on 5/20/20.
@@ -8,13 +8,13 @@
 
 import SwiftUI
 
-struct ContentView: View {
+struct StartView: View {
     
     @EnvironmentObject var gameData: GameData
     
     //
     // Body:
-    //  content and behavior of ContentView
+    //  content and behavior of StartView
     //
     var body: some View {
         NavigationView {
@@ -37,7 +37,6 @@ struct ContentView: View {
                     .navigationBarTitle("")
                     .navigationBarHidden(true)
                     
-//                    Spacer()
                     Divider()
                     Divider()
                     
@@ -52,12 +51,6 @@ struct ContentView: View {
                 .padding()
             }
         }
-//               .background(Color.black)
     }
-}
-
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
-    }
+    
 }

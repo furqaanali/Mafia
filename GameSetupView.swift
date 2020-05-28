@@ -31,6 +31,21 @@ struct GameSetupView: View {
     
     
     //
+    // Body:
+    //  content and behavior of GameSetupView
+    //
+    var body: some View {
+        Group {
+            if !self.dataCollected {
+                self.createDataCollectionView()
+            }
+            else {
+                self.createPasswordCreationView()
+            }
+        }
+    }
+    
+    //
     // SaveGameData
     //  copy all of the acquired information into
     //  the @EnvironmentObject so this data can
@@ -57,7 +72,6 @@ struct GameSetupView: View {
             showInvalidAlert.toggle()
         }
     }
-    
     
     //
     // IsGameDataValid
@@ -101,12 +115,11 @@ struct GameSetupView: View {
         return (
             ZStack {
                 Image("mafiaBackground")
-                .resizable()
-                .edgesIgnoringSafeArea(.all)
-                .aspectRatio(contentMode: .fill)
+                    .resizable()
+                    .edgesIgnoringSafeArea(.all)
+                    .aspectRatio(contentMode: .fill)
                 
                 VStack {
-                    
                     VStack {
                         Stepper(value: self.$numPlayers, in: 4...25) {
                             Text("Players: \(self.numPlayers)")
@@ -165,9 +178,6 @@ struct GameSetupView: View {
                 .navigationBarTitle("")
                 .navigationBarHidden(true)
             }
-            
-            
-//            .background(Color.gray)
         )
     }
     
@@ -179,10 +189,10 @@ struct GameSetupView: View {
     func createPasswordCreationView() -> some View {
         return (
             ZStack {
-            Image("lockImage")
-            .resizable()
-            .edgesIgnoringSafeArea(.all)
-            .aspectRatio(contentMode: .fill)
+                Image("lockImage")
+                    .resizable()
+                    .edgesIgnoringSafeArea(.all)
+                    .aspectRatio(contentMode: .fill)
                 
                 VStack {
                     if !passwordAccepted {
@@ -208,7 +218,6 @@ struct GameSetupView: View {
                             .opacity(0.85)
                             .cornerRadius(40)
                         }
-                        
                     }
                         
                     else {
@@ -232,26 +241,4 @@ struct GameSetupView: View {
         )
     }
     
-    //
-    // Body:
-    //  content and behavior of GameSetupView
-    //
-    var body: some View {
-        Group {
-            if !self.dataCollected {
-                self.createDataCollectionView()
-            }
-            else {
-                self.createPasswordCreationView()
-            }
-        }
-    }
-    
-}
-
-
-struct GameSetupView_Previews: PreviewProvider {
-    static var previews: some View {
-        GameSetupView()
-    }
 }
