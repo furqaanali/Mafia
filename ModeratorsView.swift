@@ -93,6 +93,7 @@ struct ModeratorsView: View {
     //  by special-role players during the night
     //
     func processPlayerChoices() -> Void {
+        currentEvents.append("Night Events:")
         if nightlyChoices[0] != "" { // mafia made an attack
             currentEvents.append("\(nightlyChoices[0]) was attacked by the Mafia")
         }
@@ -104,6 +105,9 @@ struct ModeratorsView: View {
         }
         if nightlyChoices[3] != "" {
             currentEvents.append("\(nightlyChoices[3]) is protected from lynching by the Lawyer")
+        }
+        if currentRound == 2 && gameData.roles.contains("Cupid") {
+            currentEvents.append("Cupid linked: \(gameData.lovers)")
         }
         if nightlyChoices[4] != "" {
             let inhibitedPlayer = nightlyChoices[4]
@@ -161,6 +165,7 @@ struct ModeratorsView: View {
         if attackedByMafia != "" && attackedByMafia == attackedByKiller && attackedByKiller == treatedByDoctor {   // if both serial killer and mafia attacked player treated by doctor, eliminate the player
             eliminatePlayer(playerName: attackedByMafia, treatedByDoctor: treatedByDoctor)
         }
+        currentEvents.append("")
     }
     
     //
@@ -169,6 +174,7 @@ struct ModeratorsView: View {
     //  to be lynched while player is not protected
     //
     func handleLynch() -> Void {
+        currentEvents.append("Lynch Events:")
         if playerBeingLynched != "" {
             if playerBeingLynched != playerProtectedFromLynch {
                 eliminatePlayer(playerName: playerBeingLynched, treatedByDoctor: "")

@@ -196,7 +196,8 @@ struct GameSetupView: View {
                 
                 VStack {
                     if !passwordAccepted {
-                        Spacer()
+                        Divider()
+                        Divider()
                         
                         TextField("Create A Password", text: $password)
                             .background(Color.white)

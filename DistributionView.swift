@@ -175,10 +175,10 @@ struct DistributionView: View {
                     .aspectRatio(contentMode: .fill)
                 
                 VStack {
-                    Spacer()
-                    
                     if !isPasswordValid {
                         Text("Return Phone to Moderator")
+                            .foregroundColor(Color.white)
+                            .fontWeight(.heavy)
                     
                         TextField("Enter Game Password", text: $password)
                             .background(Color.white)
@@ -203,6 +203,8 @@ struct DistributionView: View {
                     }
                     
                     else {
+                        Spacer()
+                        
                         NavigationLink(destination: ModeratorsView()) {
                             Text("Continue to Moderators Screen")
                                 .padding()
