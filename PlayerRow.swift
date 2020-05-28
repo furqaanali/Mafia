@@ -22,12 +22,13 @@ struct PlayerRow: View {
     var body: some View {
         HStack {
             Image(gameData.roles[index])
-            .resizable()
-            .frame(width: 40, height: 40)
-            .clipShape(Circle())
-            .overlay(
-                Circle().stroke(Color.black, lineWidth: 2))
-            .shadow(radius: 5)
+                .resizable()
+                .frame(width: 40, height: 40)
+                .background(Color.red)
+                .clipShape(Circle())
+                .overlay(
+                    Circle().stroke(Color.black, lineWidth: 2))
+                .shadow(radius: 5)
             
             Divider()
             

@@ -1,5 +1,5 @@
 //
-//  DirectorsView.swift
+//  ModeratorsView.swift
 //  Mafia3
 //
 //  Created by Furqaan Ali on 5/20/20.
@@ -8,7 +8,7 @@
 
 import SwiftUI
 
-struct DirectorsView: View {
+struct ModeratorsView: View {
     
     @EnvironmentObject var gameData: GameData
     
@@ -32,7 +32,7 @@ struct DirectorsView: View {
     
     //
     // Body:
-    //  content and behavior of DirectorsView
+    //  content and behavior of ModeratorsView
     //
     var body: some View {
         Group {
@@ -190,6 +190,7 @@ struct DirectorsView: View {
     //
     func eliminatePlayer(playerName: String, treatedByDoctor: String) -> Void {
         var index = gameData.activePlayers.firstIndex(of: playerName)
+        if index == nil {return} // player has already been eliminated
         gameData.activePlayers.remove(at: index!)
         index = gameData.playerNames.firstIndex(of: playerName)
         gameData.isActive[index!] = false
@@ -228,13 +229,11 @@ struct DirectorsView: View {
     func presentResults() -> some View {
         return (
             VStack {
-                Text("Round Events")
+                Text("ROUND EVENTS")
                     .font(.title)
                 List(currentEvents, id: \.self) { event in
                     Text(event)
                 }
-                .background(Color.green)
-                .opacity(0.6)
             }
             .padding()
             .background(Color.gray)
@@ -353,7 +352,7 @@ struct DirectorsView: View {
     
     //
     // CreateDayView
-    //  generate view where director can
+    //  generate view where Moderator can
     //  see all player and round information
     //
     func createDayView() -> some View {
@@ -445,7 +444,7 @@ struct DirectorsView: View {
     
     //
     // CreateNightView
-    //  generate view where director can
+    //  generate view where Moderator can
     //  select all events that occurred in the round
     //
     func createNightView() -> some View {
@@ -499,7 +498,7 @@ struct DirectorsView: View {
     
     //
     // CreateLynchView
-    //  generate view where director can
+    //  generate view where Moderator can
     //  select which player the community
     //  decided to lynch
     //

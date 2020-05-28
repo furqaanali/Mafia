@@ -178,7 +178,7 @@ struct DistributionView: View {
                     Spacer()
                     
                     if !isPasswordValid {
-                        Text("Return Phone to Director")
+                        Text("Return Phone to Moderator")
                     
                         TextField("Enter Game Password", text: $password)
                             .background(Color.white)
@@ -203,8 +203,8 @@ struct DistributionView: View {
                     }
                     
                     else {
-                        NavigationLink(destination: DirectorsView()) {
-                            Text("Continue to Directors Screen")
+                        NavigationLink(destination: ModeratorsView()) {
+                            Text("Continue to Moderators Screen")
                                 .padding()
                                 .foregroundColor(Color.white)
                                 .background(Color.blue)
